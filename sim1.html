@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CardioFlow — Interactive 3D-Style Heart Simulator</title>
+
+  <!-- Modern Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --emerald: #43bc65;
+      --crimson: #c3503c;
+      --forest: #378136;
+      --sage: #738576;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f4f7f5;
+      background-image:
+        radial-gradient(circle at 18% 15%, rgba(67, 188, 101, 0.12), transparent 42%),
+        radial-gradient(circle at 84% 18%, rgba(195, 80, 60, 0.10), transparent 42%),
+        radial-gradient(circle at 50% 90%, rgba(55, 129, 54, 0.10), transparent 48%);
+      color: #16201a;
+      margin: 0;
+      overflow-x: hidden;
+      transition: background-color 0.35s ease, color 0.35s ease;
+    }
+
+    body.dark-stage {
+      background-color: #0b120e;
+      background-image:
+        radial-gradient(circle at 20% 15%, rgba(67, 188, 101, 0.16), transparent 45%),
+        radial-gradient(circle at 82% 20%, rgba(195, 80, 60, 0.16), transparent 45%),
+        radial-gradient(circle at 50% 90%, rgba(55, 129, 54, 0.14), transparent 50%);
+      color: #eef5f0;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Subtle Blueprint Grid */
+    .stage-grid {
+      background-size: 32px 32px;
+      background-image:
+        linear-gradient(to right, rgba(115, 133, 118, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(115, 133, 118, 0.08) 1px, transparent 1px);
+    }
+
+    body.dark-stage .stage-grid {
+      background-image:
+        linear-gradient(to right, rgba(67, 188, 101, 0.07) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(67, 188, 101, 0.07) 1px, transparent 1px);
+    }
+
+    /* VisionOS-Inspired Floating Glass */
+    .glass-dock {
+      background: rgba(255, 255, 255, 0.84);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(115, 133, 118, 0.22);
+      box-shadow:
+        0 20px 45px -15px rgba(22, 32, 26, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    body.dark-stage .glass-dock {
+      background: rgba(18, 28, 22, 0.82);
+      border: 1px solid rgba(67, 188, 101, 0.25);
+      box-shadow:
+        0 24px 50px -12px rgba(0, 0, 0, 0.65),
+        inset 0 1px 0 rgba(67, 188, 101, 0.15);
+    }
+
+    /* 3D Perspective Stage */
+    .perspective-stage {
+      perspective: 1200px;
+    }
+
+    #heart-3d-rig {
+      transform-style: preserve-3d;
+      transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+    }
+
+    /* Interactive Clickable Anatomy Regions */
+    .heart-part {
+      cursor: pointer;
+      transition: filter 0.2s ease, opacity 0.2s ease;
+    }
+
+    .heart-part:hover {
+      filter: brightness(1.08) drop-shadow(0 0 10px rgba(67, 188, 101, 0.55));
+    }
+
+    .heart-part.selected {
+      filter: drop-shadow(0 0 14px rgba(67, 188, 101, 0.85));
+    }
+
+    /* Hotspot Target Rings */
+    @keyframes pulseBeacon {
+      0% { transform: scale(0.9); opacity: 0.9; }
+      70% { transform: scale(1.85); opacity: 0; }
+      100% { transform: scale(1.85); opacity: 0; }
+    }
+
+    .hotspot-ring {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: pulseBeacon 2.2s infinite cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Defibrillator Flash */
+    @keyframes shockFlash {
+      0% { opacity: 0.85; }
+      100% { opacity: 0; }
+    }
+
+    .shock-overlay-active {
+      animation: shockFlash 0.55s ease-out forwards;
+    }
+
+    /* Custom Range Slider */
+    input[type="range"].studio-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(115, 133, 118, 0.25);
+      outline: none;
+    }
+
+    input[type="range"].studio-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #43bc65;
+      border: 2.5px solid #ffffff;
+      box-shadow: 0 2px 8px rgba(55, 129, 54, 0.45);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"].studio-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.16);
+    }
+
+    /* Smooth Camera ViewBox Transition */
+    #main-stage-svg {
+      transition: viewBox 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between stage-grid selection:bg-[#43bc65]/25">
+
+  <!-- Shock Flash Overlay -->
+  <div id="shock-flash" class="fixed inset-0 bg-[#43bc65] pointer-events-none opacity-0 z-50"></div>
+
+  <!-- MINIMAL FLOATING TOP BAR -->
+  <header class="w-full max-w-[1440px] mx-auto px-4 sm:px-6 pt-4 flex items-center justify-between gap-3 z-30">
+    <!-- Brand Mark -->
+    <div class="glass-dock rounded-2xl px-3.5 py-2 flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-[#378136] to-[#43bc65] flex items-center justify-center shadow-sm">
+        <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      </div>
+      <span class="font-extrabold tracking-tight text-sm sm:text-base">
+        Cardio<span class="text-[#43bc65]">Flow</span>
+      </span>
+    </div>
+
+    <!-- Compact Visual Mode Pills -->
+    <div class="glass-dock rounded-2xl p-1.5 flex items-center gap-1.5">
+      <!-- Camera View Toggle -->
+      <button id="btn-view-mode" type="button"
+        class="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#378136] text-white shadow-sm transition-all cursor-pointer">
+        Full Body
+      </button>
+
+      <!-- X-Ray Cutaway Toggle -->
+      <button id="btn-xray" type="button"
+        class="px-3 py-1.5 rounded-xl text-xs font-bold text-[#738576] hover:text-[#43bc65] transition-all flex items-center gap-1.5 cursor-pointer">
+        <span id="xray-dot" class="w-2 h-2 rounded-full bg-[#43bc65]"></span>
+        <span>X-Ray</span>
+      </button>
+
+      <!-- Studio / Dark Mode Toggle -->
+      <button id="btn-theme" type="button"
+        class="px-3 py-1.5 rounded-xl text-xs font-bold text-[#738576] hover:text-[#43bc65] transition-all cursor-pointer"
+        title="Switch Light / Dark Studio">
+        <span id="theme-label">Dark</span>
+      </button>
+
+      <!-- Audio Toggle -->
+      <button id="btn-sound" type="button"
+        class="p-2 rounded-xl text-[#738576] hover:text-[#43bc65] transition-all cursor-pointer"
+        title="Heartbeat Sound">
+        <svg id="icon-muted" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+        </svg>
+        <svg id="icon-unmuted" class="w-4 h-4 text-[#43bc65] hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN INTERACTIVE STAGE -->
+  <main class="relative flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 flex flex-col lg:flex-row items-center justify-center gap-4 py-2">
+
+    <!-- 3D-TILT INTERACTIVE HEART & CIRCULATION CANVAS -->
+    <div id="stage-container" class="perspective-stage relative w-full flex-1 flex items-center justify-center min-h-[430px] sm:min-h-[540px]">
+      <div id="heart-3d-rig" class="w-full max-w-[820px] flex items-center justify-center">
+        <svg id="main-stage-svg" viewBox="0 0 900 660" class="w-full h-auto max-h-[68vh] select-none overflow-visible">
+          <defs>
+            <!-- 3D Muscular Myocardium Gradients -->
+            <radialGradient id="grad-muscle-left" cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#e06d58" />
+              <stop offset="55%" stop-color="#c3503c" />
+              <stop offset="100%" stop-color="#872e1f" />
+            </radialGradient>
+
+            <radialGradient id="grad-muscle-right" cx="65%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#7c998b" />
+              <stop offset="60%" stop-color="#587467" />
+              <stop offset="100%" stop-color="#384d43" />
+            </radialGradient>
+
+            <linearGradient id="grad-aorta" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#df6b56" />
+              <stop offset="50%" stop-color="#c3503c" />
+              <stop offset="100%" stop-color="#8f3222" />
+            </linearGradient>
+
+            <linearGradient id="grad-vena" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#4c675a" />
+              <stop offset="50%" stop-color="#738576" />
+              <stop offset="100%" stop-color="#455c50" />
+            </linearGradient>
+
+            <linearGradient id="grad-emerald-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#43bc65" />
+              <stop offset="100%" stop-color="#378136" />
+            </linearGradient>
+
+            <!-- Soft 3D Elevation Shadow -->
+            <filter id="heart-3d-shadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#16201a" flood-opacity="0.22" />
+            </filter>
+
+            <filter id="neon-pulse" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- ========================================================= -->
+          <!-- LAYER 1: TRANSLUCENT BODY & CIRCULATORY HIGHWAY           -->
+          <!-- ========================================================= -->
+          <g id="systemic-loop-layer">
+            <!-- Subtle Human Torso & Head Silhouette -->
+            <path d="M450 24 C484 24 508 48 508 82 C508 106 494 124 478 134 L484 156 C556 172 606 226 614 316 L628 492 C630 518 608 534 586 526 L566 364 L556 624 L344 624 L334 364 L314 526 C292 534 270 518 272 492 L286 316 C294 226 344 172 416 156 L422 134 C406 124 392 106 392 82 C392 48 416 24 450 24 Z"
+              fill="rgba(115, 133, 118, 0.06)" stroke="rgba(115, 133, 118, 0.22)" stroke-width="2" />
+
+            <!-- Lungs Organ Node (Top) -->
+            <g class="heart-part" data-part="lungs">
+              <!-- Left & Right Lung Lobes -->
+              <path d="M424 148 C374 144 334 188 330 252 C328 286 350 304 384 298 L424 286 Z"
+                fill="rgba(67, 188, 101, 0.12)" stroke="#43bc65" stroke-width="2" />
+              <path d="M476 148 C526 144 566 188 570 252 C572 286 550 304 516 298 L476 286 Z"
+                fill="rgba(67, 188, 101, 0.12)" stroke="#43bc65" stroke-width="2" />
+              <!-- Alveolar Capillaries -->
+              <path d="M365 215 Q390 195 415 215 M355 248 Q388 232 418 248 M535 215 Q510 195 485 215 M545 248 Q512 232 482 248"
+                fill="none" stroke="#43bc65" stroke-width="1.6" stroke-dasharray="3 3" opacity="0.75" />
+            </g>
+
+            <!-- Pulmonary Circulation Tracks (Heart <-> Lungs) -->
+            <path d="M412 248 C395 200 375 182 375 218" fill="none" stroke="#738576" stroke-width="9" stroke-linecap="round" opacity="0.45" />
+            <path d="M525 224 C555 232 562 272 528 286" fill="none" stroke="#c3503c" stroke-width="9" stroke-linecap="round" opacity="0.55" />
+
+            <!-- Systemic Circulation Loop (Aorta -> Body -> Vena Cava) -->
+            <!-- Arterial Red Side -->
+            <path d="M474 205 C565 185 655 280 655 425 C655 548 565 595 450 595"
+              fill="none" stroke="#c3503c" stroke-width="11" stroke-linecap="round" opacity="0.22" />
+            <path d="M474 205 C565 185 655 280 655 425 C655 548 565 595 450 595"
+              fill="none" stroke="#c3503c" stroke-width="3" stroke-dasharray="6 6" opacity="0.65" />
+
+            <!-- Venous Sage Side -->
+            <path d="M450 595 C335 595 245 548 245 425 C245 280 320 205 388 228"
+              fill="none" stroke="#738576" stroke-width="11" stroke-linecap="round" opacity="0.22" />
+            <path d="M450 595 C335 595 245 548 245 425 C245 280 320 205 388 228"
+              fill="none" stroke="#738576" stroke-width="3" stroke-dasharray="6 6" opacity="0.65" />
+
+            <!-- Systemic Body Capillary Bed Node (Bottom) -->
+            <g class="heart-part" data-part="body">
+              <rect x="382" y="572" width="136" height="44" rx="22"
+                fill="rgba(55, 129, 54, 0.14)" stroke="#378136" stroke-width="2.2" />
+              <text x="450" y="598" text-anchor="middle" font-size="12" font-weight="800" fill="#378136" letter-spacing="0.06em">
+                BODY TISSUES
+              </text>
+            </g>
+          </g>
+
+          <!-- ========================================================= -->
+          <!-- LAYER 2: 3D-SHADED ANATOMICAL HEART ASSEMBLY              -->
+          <!-- ========================================================= -->
+          <g id="heart-organ-group" filter="url(#heart-3d-shadow)">
+
+            <!-- GREAT VESSELS -->
+            <!-- Superior & Inferior Vena Cava -->
+            <g class="heart-part" data-part="vena_cava">
+              <path d="M376 196 L376 266 L404 266 L404 196 Z" fill="url(#grad-vena)" stroke="#3a4f44" stroke-width="2" />
+              <path d="M378 446 L378 505 L404 505 L404 446 Z" fill="url(#grad-vena)" stroke="#3a4f44" stroke-width="2" />
+              <ellipse cx="390" cy="196" rx="14" ry="5" fill="#43574d" />
+            </g>
+
+            <!-- Pulmonary Artery Trunk -->
+            <g class="heart-part" data-part="pulmonary_artery">
+              <path d="M424 316 C424 264 414 236 376 226 L382 204 C434 216 452 254 452 316 Z"
+                fill="url(#grad-vena)" stroke="#3a4f44" stroke-width="2" />
+              <path d="M442 238 C466 222 496 218 518 224 L512 244 C490 238 468 242 448 254 Z"
+                fill="url(#grad-vena)" stroke="#3a4f44" stroke-width="2" />
+            </g>
+
+            <!-- Aortic Arch (Signature Terracotta Crimson) -->
+            <g class="heart-part" data-part="aorta">
+              <path d="M454 315 C454 238 430 184 476 176 C518 168 534 214 524 262 L498 256 C504 224 496 198 478 202 C460 206 480 250 480 315 Z"
+                fill="url(#grad-aorta)" stroke="#7c281a" stroke-width="2.2" />
+              <!-- 3 Supra-aortic Crown Branches -->
+              <path d="M466 178 L462 152 M482 175 L482 148 M498 180 L504 155"
+                stroke="#c3503c" stroke-width="7" stroke-linecap="round" />
+            </g>
+
+            <!-- Pulmonary Veins -->
+            <g class="heart-part" data-part="pulmonary_veins">
+              <path d="M522 272 L564 262 L568 280 L525 290 Z" fill="url(#grad-aorta)" stroke="#7c281a" stroke-width="1.8" />
+              <path d="M524 298 L566 296 L566 314 L524 316 Z" fill="url(#grad-aorta)" stroke="#7c281a" stroke-width="1.8" />
+            </g>
+
+            <!-- HEART CHAMBERS (ATRIA & VENTRICLES) -->
+            <g id="atria-group">
+              <!-- Right Atrium -->
+              <path class="heart-part" data-part="right_atrium"
+                d="M352 264 C334 286 336 328 360 344 L414 336 L412 266 Z"
+                fill="url(#grad-muscle-right)" stroke="#384d43" stroke-width="2.5" />
+
+              <!-- Left Atrium -->
+              <path class="heart-part" data-part="left_atrium"
+                d="M478 266 L528 268 C546 288 544 326 522 342 L476 336 Z"
+                fill="url(#grad-muscle-left)" stroke="#872e1f" stroke-width="2.5" />
+            </g>
+
+            <g id="ventricles-group">
+              <!-- Right Ventricle -->
+              <path class="heart-part" data-part="right_ventricle"
+                d="M356 342 L438 340 L452 464 C404 456 356 408 356 342 Z"
+                fill="url(#grad-muscle-right)" stroke="#384d43" stroke-width="2.5" />
+
+              <!-- Left Ventricle (Thick Powerhouse Wall) -->
+              <path class="heart-part" data-part="left_ventricle"
+                d="M442 340 L526 342 C536 410 496 468 452 472 Z"
+                fill="url(#grad-muscle-left)" stroke="#872e1f" stroke-width="3" />
+
+              <!-- Interventricular Septum -->
+              <path d="M438 338 L452 468" stroke="#f4f7f5" stroke-width="4.5" stroke-linecap="round" opacity="0.85" />
+            </g>
+
+            <!-- OUTER EPICARDIUM TRANSLUCENT SHELL (Fades out in X-Ray Mode!) -->
+            <g id="epicardium-shell" pointer-events="none" style="transition: opacity 0.4s ease;">
+              <!-- Glossy 3D Specular Highlights -->
+              <path d="M368 282 C360 302 362 320 374 330" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" opacity="0.32" />
+              <path d="M512 358 C516 392 502 426 476 446" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.28" />
+              <!-- Epicardial Coronary Vessels -->
+              <path d="M444 342 C432 376 418 402 396 426 M442 358 C464 382 482 406 496 432"
+                fill="none" stroke="#43bc65" stroke-width="2.4" stroke-linecap="round" opacity="0.75" />
+            </g>
+
+            <!-- INTERIOR CHORDAL STRINGS & ANIMATED VALVES (Revealed clearly in X-Ray!) -->
+            <g id="valves-group" class="heart-part" data-part="valves">
+              <!-- Chordae Tendineae (Heart Strings) -->
+              <line x1="382" y1="342" x2="374" y2="392" stroke="#eef5f0" stroke-width="1.3" opacity="0.7" />
+              <line x1="406" y1="342" x2="412" y2="396" stroke="#eef5f0" stroke-width="1.3" opacity="0.7" />
+              <line x1="478" y1="342" x2="472" y2="398" stroke="#eef5f0" stroke-width="1.3" opacity="0.7" />
+              <line x1="504" y1="342" x2="510" y2="394" stroke="#eef5f0" stroke-width="1.3" opacity="0.7" />
+
+              <!-- Tricuspid Valve Flaps -->
+              <line id="flap-tri-1" x1="368" y1="341" x2="392" y2="346" stroke="#43bc65" stroke-width="4" stroke-linecap="round" />
+              <line id="flap-tri-2" x1="418" y1="341" x2="396" y2="346" stroke="#43bc65" stroke-width="4" stroke-linecap="round" />
+
+              <!-- Mitral (Bicuspid) Valve Flaps -->
+              <line id="flap-mit-1" x1="472" y1="341" x2="494" y2="346" stroke="#43bc65" stroke-width="4" stroke-linecap="round" />
+              <line id="flap-mit-2" x1="518" y1="341" x2="498" y2="346" stroke="#43bc65" stroke-width="4" stroke-linecap="round" />
+
+              <!-- Pulmonary Valve -->
+              <line id="flap-pulm-1" x1="426" y1="316" x2="438" y2="310" stroke="#43bc65" stroke-width="3.5" stroke-linecap="round" />
+              <line id="flap-pulm-2" x1="450" y1="316" x2="440" y2="310" stroke="#43bc65" stroke-width="3.5" stroke-linecap="round" />
+
+              <!-- Aortic Valve -->
+              <line id="flap-aort-1" x1="456" y1="316" x2="467" y2="310" stroke="#43bc65" stroke-width="3.5" stroke-linecap="round" />
+              <line id="flap-aort-2" x1="479" y1="316" x2="469" y2="310" stroke="#43bc65" stroke-width="3.5" stroke-linecap="round" />
+            </g>
+
+            <!-- SA Node Pacemaker Spark -->
+            <circle id="sa-node-spark" cx="364" cy="278" r="5" fill="#43bc65" filter="url(#neon-pulse)" opacity="0.85" pointer-events="none" />
+
+            <!-- Pressure Shockwave Ring -->
+            <circle id="pulse-wave-ring" cx="448" cy="360" r="85" fill="none" stroke="#43bc65" stroke-width="2.5" opacity="0" pointer-events="none" />
+          </g>
+
+          <!-- ========================================================= -->
+          <!-- LAYER 3: LUMINOUS BLOOD PARTICLES + TRAILS (CANVAS/SVG)   -->
+          <!-- ========================================================= -->
+          <g id="blood-stream-layer" pointer-events="none"></g>
+
+          <!-- ========================================================= -->
+          <!-- LAYER 4: MINIMALIST INTERACTIVE HOTSPOT PINS              -->
+          <!-- ========================================================= -->
+          <g id="hotspots-layer">
+            <!-- Vena Cava -->
+            <g class="heart-part" data-part="vena_cava" transform="translate(390, 212)">
+              <circle r="11" fill="#43bc65" opacity="0.3" class="hotspot-ring" />
+              <circle r="6" fill="#378136" stroke="#ffffff" stroke-width="2" />
+            </g>
+            <!-- Right Atrium -->
+            <g class="heart-part" data-part="right_atrium" transform="translate(376, 304)">
+              <circle r="11" fill="#43bc65" opacity="0.3" class="hotspot-ring" />
+              <circle r="6" fill="#378136" stroke="#ffffff" stroke-width="2" />
+            </g>
+            <!-- Right Ventricle -->
+            <g class="heart-part" data-part="right_ventricle" transform="translate(402, 396)">
+              <circle r="11" fill="#43bc65" opacity="0.3" class="hotspot-ring" />
+              <circle r="6" fill="#378136" stroke="#ffffff" stroke-width="2" />
+            </g>
+            <!-- Pulmonary Artery -->
+            <g class="heart-part" data-part="pulmonary_artery" transform="translate(425, 245)">
+              <circle r="11" fill="#43bc65" opacity="0.3" class="hotspot-ring" />
+              <circle r="6" fill="#378136" stroke="#ffffff" stroke-width="2" />
+            </g>
+            <!-- Lungs -->
+            <g class="heart-part" data-part="lungs" transform="translate(378, 178)">
+              <circle r="11" fill="#43bc65" opacity="0.3" class="hotspot-ring" />
+              <circle r="6" fill="#43bc65" stroke="#ffffff" stroke-width="2" />
+            </g>
+            <!-- Pulmonary Veins -->
+            <g class="heart-part" data-part="pulmonary_veins" transform="translate(550, 282)">
+              <circle r="11" fill="#c3503c" opacity="0.35" class="hotspot-ring" />
+              <circle r="6" fill="#c3503c" stroke="#ffffff" stroke-width="2" />
+            </g>
+            <!-- Left Atrium -->
+            <g class="heart-part" data-part="left_atrium" transform="translate(508, 304)">
+              <circle r="11" fill="#c3503c" opacity="0.35" class="hotspot-ring" />
+              <circle r="6" fill="#c3503c" stroke="#ffffff" stroke-width="2" />
+            </g>
+            <!-- Left Ventricle -->
+            <g class="heart-part" data-part="left_ventricle" transform="translate(490, 396)">
+              <circle r="11" fill="#c3503c" opacity="0.35" class="hotspot-ring" />
+              <circle r="6" fill="#c3503c" stroke="#ffffff" stroke-width="2" />
+            </g>
+            <!-- Aorta -->
+            <g class="heart-part" data-part="aorta" transform="translate(486, 186)">
+              <circle r="11" fill="#c3503c" opacity="0.35" class="hotspot-ring" />
+              <circle r="6" fill="#c3503c" stroke="#ffffff" stroke-width="2" />
+            </g>
+            <!-- Valves -->
+            <g class="heart-part" data-part="valves" transform="translate(445, 341)">
+              <circle r="11" fill="#43bc65" opacity="0.35" class="hotspot-ring" />
+              <circle r="6" fill="#43bc65" stroke="#ffffff" stroke-width="2" />
+            </g>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- SLEEK FLOATING GLASS ANATOMY CARD (COMPACT & VISUAL-FIRST) -->
+    <aside id="inspector-card" class="glass-dock w-full lg:w-[340px] rounded-3xl p-4 sm:p-5 flex flex-col gap-3.5 z-20 transition-all duration-300">
+      <!-- Top Row: Step Pill + Close/Minimize -->
+      <div class="flex items-center justify-between">
+        <span id="card-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#c3503c]/15 text-[#c3503c]">
+          Oxygen-Rich Pump
+        </span>
+        <span id="card-step" class="font-mono text-[11px] font-bold text-[#738576]">
+          08 / 11
+        </span>
+      </div>
+
+      <!-- Title -->
+      <div>
+        <h2 id="card-title" class="text-xl font-extrabold tracking-tight">Left Ventricle</h2>
+        <p id="card-tagline" class="text-xs font-semibold text-[#43bc65]">Main High-Pressure Body Pump</p>
+      </div>
+
+      <!-- Custom Visual Diagram ("Image") -->
+      <div id="card-visual" class="rounded-2xl bg-[#738576]/10 border border-[#738576]/20 p-3 flex items-center justify-center h-[135px]">
+        <!-- Injected custom SVG -->
+      </div>
+
+      <!-- 3 Crisp Metric Chips -->
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="rounded-xl bg-[#738576]/10 py-1.5 px-2">
+          <span class="block text-[9px] font-bold uppercase text-[#738576]">Oxygen</span>
+          <span id="metric-o2" class="font-mono text-xs font-extrabold text-[#c3503c]">98% O₂</span>
+        </div>
+        <div class="rounded-xl bg-[#738576]/10 py-1.5 px-2">
+          <span class="block text-[9px] font-bold uppercase text-[#738576]">Pressure</span>
+          <span id="metric-bp" class="font-mono text-xs font-extrabold">120 mmHg</span>
+        </div>
+        <div class="rounded-xl bg-[#738576]/10 py-1.5 px-2">
+          <span class="block text-[9px] font-bold uppercase text-[#738576]">Next</span>
+          <span id="metric-next" class="font-mono text-xs font-extrabold text-[#43bc65]">Aorta</span>
+        </div>
+      </div>
+
+      <!-- Ultra-Punchy 2-Sentence Explanation -->
+      <p id="card-desc" class="text-xs sm:text-[13px] leading-relaxed text-[#738576]">
+        Thickest muscular wall in the heart. Squeezes forcefully to rocket oxygen-rich blood through the Aorta to your brain and muscles.
+      </p>
+
+      <!-- Step-Through Action -->
+      <div class="flex items-center gap-2 pt-0.5">
+        <button id="btn-prev-part" type="button"
+          class="px-3 py-2 rounded-xl text-xs font-bold bg-[#738576]/15 hover:bg-[#738576]/25 transition-all cursor-pointer">
+          ←
+        </button>
+        <button id="btn-next-part" type="button"
+          class="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-gradient-to-r from-[#378136] to-[#43bc65] text-white shadow-sm hover:brightness-105 transition-all cursor-pointer">
+          Follow Blood Flow →
+        </button>
+      </div>
+    </aside>
+  </main>
+
+  <!-- FLOATING BOTTOM STUDIO DOCK -->
+  <footer class="w-full max-w-[960px] mx-auto px-4 pb-4 sm:pb-5 z-30">
+    <div class="glass-dock rounded-3xl px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+
+      <!-- Big Tactile Play / Pause Button -->
+      <button id="btn-play" type="button"
+        class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#378136] to-[#43bc65] text-white font-extrabold text-xs sm:text-sm tracking-wide shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer">
+        <svg id="icon-play" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+        <svg id="icon-pause" class="w-4 h-4 hidden" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+        </svg>
+        <span id="play-label">PUMP HEART</span>
+      </button>
+
+      <!-- Live Miniature ECG Monitor -->
+      <div class="hidden sm:flex items-center gap-2.5 px-3 py-1.5 rounded-2xl bg-[#738576]/10 border border-[#738576]/20">
+        <svg id="ecg-svg" viewBox="0 0 140 34" class="w-28 h-7 overflow-visible">
+          <polyline id="ecg-line" fill="none" stroke="#43bc65" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" points="0,18 140,18" />
+        </svg>
+        <div class="text-right leading-none">
+          <span id="bpm-val" class="font-mono text-base font-extrabold text-[#43bc65]">72</span>
+          <span class="block text-[9px] font-bold text-[#738576]">BPM</span>
+        </div>
+      </div>
+
+      <!-- BPM Slider -->
+      <div class="flex items-center gap-2.5 flex-1 min-w-[130px] max-w-[200px]">
+        <span class="text-[10px] font-extrabold text-[#738576]">PACE</span>
+        <input id="bpm-slider" type="range" min="45" max="165" value="72" class="studio-slider w-full" />
+      </div>
+
+      <!-- Quick Energy Presets + Defibrillator Shock -->
+      <div class="flex items-center gap-1.5">
+        <button type="button" data-bpm="62" class="pace-chip px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-[#738576]/12 hover:bg-[#43bc65]/20 hover:text-[#378136] transition-all cursor-pointer">
+          Calm
+        </button>
+        <button type="button" data-bpm="148" class="pace-chip px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-[#738576]/12 hover:bg-[#c3503c]/20 hover:text-[#c3503c] transition-all cursor-pointer">
+          Sprint
+        </button>
+        <button id="btn-shock" type="button"
+          class="px-3 py-1.5 rounded-xl text-[11px] font-extrabold bg-[#c3503c] text-white shadow-sm hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+          title="Deliver electrical cardioversion pulse">
+          ⚡ Shock
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- INTERACTIVE SIMULATION & GRAPHICS ENGINE -->
+  <script>
+    // =========================================================================
+    // 1. CONCISE, VISUAL-FIRST ANATOMY DATA (NO TEXTBOOK WALLS!)
+    // =========================================================================
+    const ANATOMY = [
+      {
+        id: 'vena_cava',
+        title: 'Vena Cava',
+        tagline: 'Main Venous Return Highway',
+        badge: 'Oxygen-Poor Return',
+        badgeColor: '#738576',
+        o2: '72% O₂',
+        bp: '4 mmHg',
+        next: 'R. Atrium',
+        desc: 'Two giant veins collect oxygen-depleted blood from your upper and lower body and deliver it straight into the Right Atrium.',
+        svg: `<svg viewBox="0 0 180 110" class="w-full h-full">
+          <rect x="74" y="10" width="32" height="90" rx="12" fill="#738576" opacity="0.85"/>
+          <path d="M90 22 L90 50 M82 42 L90 52 L98 42" stroke="#43bc65" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M90 88 L90 62 M82 70 L90 60 L98 70" stroke="#43bc65" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'right_atrium',
+        title: 'Right Atrium',
+        tagline: 'Upper Receiving Chamber + Pacemaker',
+        badge: 'Right Heart Chamber',
+        badgeColor: '#738576',
+        o2: '75% O₂',
+        bp: '5 mmHg',
+        next: 'R. Ventricle',
+        desc: 'Receives returning body blood and houses the SA Node—your heart’s natural spark plug that sets every beat.',
+        svg: `<svg viewBox="0 0 180 110" class="w-full h-full">
+          <path d="M55 28 C42 52 48 82 76 86 L124 80 L122 28 Z" fill="#738576"/>
+          <circle cx="72" cy="44" r="8" fill="#43bc65"/>
+          <circle cx="72" cy="44" r="15" fill="none" stroke="#43bc65" stroke-width="2" stroke-dasharray="3 3"/>
+        </svg>`
+      },
+      {
+        id: 'right_ventricle',
+        title: 'Right Ventricle',
+        tagline: 'Low-Pressure Lung Pump',
+        badge: 'Right Heart Chamber',
+        badgeColor: '#738576',
+        o2: '75% O₂',
+        bp: '25 mmHg',
+        next: 'Pulm. Artery',
+        desc: 'Wraps around the right side and gently pumps oxygen-poor blood upward toward the lungs without damaging delicate lung capillaries.',
+        svg: `<svg viewBox="0 0 180 110" class="w-full h-full">
+          <path d="M54 24 L126 24 L132 94 C92 90 58 64 54 24 Z" fill="#587467"/>
+          <path d="M92 74 L92 36 M82 46 L92 34 L102 46" stroke="#43bc65" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'pulmonary_artery',
+        title: 'Pulmonary Artery',
+        tagline: 'Twin Vessels to Left & Right Lungs',
+        badge: 'Pulmonary Trunk',
+        badgeColor: '#738576',
+        o2: '75% O₂',
+        bp: '25 mmHg',
+        next: 'Lungs',
+        desc: 'Splits into left and right branches like a T-junction, carrying dark oxygen-poor blood directly into both lungs.',
+        svg: `<svg viewBox="0 0 180 110" class="w-full h-full">
+          <path d="M78 96 L78 48 C78 34 56 32 30 32 M102 96 L102 48 C102 34 124 32 150 32" stroke="#738576" stroke-width="14" fill="none" stroke-linecap="round"/>
+          <path d="M90 84 L90 52 L54 32 M90 52 L126 32" stroke="#43bc65" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'lungs',
+        title: 'Lungs & Alveoli',
+        tagline: 'Gas Exchange Recharge Station',
+        badge: 'Oxygenation Zone',
+        badgeColor: '#43bc65',
+        o2: '75% → 99%',
+        bp: '15 mmHg',
+        next: 'Pulm. Veins',
+        desc: 'Carbon dioxide exits into your breath while fresh inhaled oxygen binds to red blood cells, turning blood bright crimson.',
+        svg: `<svg viewBox="0 0 180 110" class="w-full h-full">
+          <path d="M84 20 C54 20 34 46 34 80 C34 94 48 98 84 92 Z" fill="#43bc65" opacity="0.25" stroke="#43bc65" stroke-width="2.5"/>
+          <path d="M96 20 C126 20 146 46 146 80 C146 94 132 98 96 92 Z" fill="#c3503c" opacity="0.25" stroke="#c3503c" stroke-width="2.5"/>
+          <circle cx="62" cy="64" r="7" fill="#738576"/>
+          <circle cx="118" cy="64" r="7" fill="#c3503c"/>
+          <path d="M76 64 L104 64" stroke="#43bc65" stroke-width="3" stroke-dasharray="3 3"/>
+        </svg>`
+      },
+      {
+        id: 'pulmonary_veins',
+        title: 'Pulmonary Veins',
+        tagline: 'Fresh Oxygen Return Conduits',
+        badge: 'Oxygen-Rich Flow',
+        badgeColor: '#c3503c',
+        o2: '99% O₂',
+        bp: '10 mmHg',
+        next: 'L. Atrium',
+        desc: 'Four vessels carry freshly oxygenated crimson blood from the lungs straight back into the Left Atrium.',
+        svg: `<svg viewBox="0 0 180 110" class="w-full h-full">
+          <rect x="28" y="32" width="124" height="14" rx="7" fill="#c3503c"/>
+          <rect x="28" y="64" width="124" height="14" rx="7" fill="#c3503c"/>
+          <path d="M126 39 L64 39 M74 33 L62 39 L74 45" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'left_atrium',
+        title: 'Left Atrium',
+        tagline: 'Oxygenated Booster Chamber',
+        badge: 'Left Heart Chamber',
+        badgeColor: '#c3503c',
+        o2: '98% O₂',
+        bp: '8 mmHg',
+        next: 'L. Ventricle',
+        desc: 'Collects oxygen-rich lung blood and contracts to top off the Left Ventricle right before the main power stroke.',
+        svg: `<svg viewBox="0 0 180 110" class="w-full h-full">
+          <path d="M58 26 L118 26 C136 46 134 78 112 88 L58 84 Z" fill="#c3503c"/>
+          <path d="M92 40 L92 74 M82 64 L92 76 L102 64" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'left_ventricle',
+        title: 'Left Ventricle',
+        tagline: 'Main High-Pressure Body Pump',
+        badge: 'Oxygen-Rich Pump',
+        badgeColor: '#c3503c',
+        o2: '98% O₂',
+        bp: '120 mmHg',
+        next: 'Aorta',
+        desc: 'Thickest muscular wall in the heart. Squeezes forcefully to rocket oxygen-rich blood through the Aorta to your brain and muscles.',
+        svg: `<svg viewBox="0 0 180 110" class="w-full h-full">
+          <path d="M58 22 L124 22 C132 66 106 94 74 96 Z" fill="#c3503c" stroke="#872e1f" stroke-width="4"/>
+          <path d="M88 76 L98 36 M88 44 L98 34 L106 46" stroke="#ffffff" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'aorta',
+        title: 'Aortic Arch',
+        tagline: 'Body’s Largest Elastic Super-Artery',
+        badge: 'Systemic Outflow',
+        badgeColor: '#c3503c',
+        o2: '98% O₂',
+        bp: '120/80',
+        next: 'Body',
+        desc: 'Arches out of the Left Ventricle like a candy cane, branching upward to feed your brain and downward to fuel your entire body.',
+        svg: `<svg viewBox="0 0 180 110" class="w-full h-full">
+          <path d="M68 96 L68 48 C68 22 118 22 118 52 L118 96" stroke="#c3503c" stroke-width="18" fill="none" stroke-linecap="round"/>
+          <path d="M80 28 L80 10 M94 26 L94 8 M108 30 L108 12" stroke="#c3503c" stroke-width="6" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'valves',
+        title: 'One-Way Heart Valves',
+        tagline: 'Tricuspid · Mitral · Pulmonary · Aortic',
+        badge: 'Precision Flow Gates',
+        badgeColor: '#43bc65',
+        o2: 'Both Sides',
+        bp: 'Zero Backflow',
+        next: 'Forward Flow',
+        desc: 'Four fibrous doors snap shut in sequence to prevent backward leaks—creating the signature “Lub-Dub” heartbeat sound.',
+        svg: `<svg viewBox="0 0 180 110" class="w-full h-full">
+          <line x1="36" y1="56" x2="82" y2="44" stroke="#43bc65" stroke-width="6" stroke-linecap="round"/>
+          <line x1="144" y1="56" x2="98" y2="44" stroke="#43bc65" stroke-width="6" stroke-linecap="round"/>
+          <circle cx="90" cy="44" r="5" fill="#378136"/>
+        </svg>`
+      },
+      {
+        id: 'body',
+        title: 'Body Tissues',
+        tagline: 'Systemic Capillary Delivery Network',
+        badge: 'Energy Delivery',
+        badgeColor: '#378136',
+        o2: '98% → 72%',
+        bp: '20 mmHg',
+        next: 'Vena Cava',
+        desc: 'Microscopic capillaries drop off oxygen and nutrients to every cell, then send oxygen-depleted blood back up the Vena Cava.',
+        svg: `<svg viewBox="0 0 180 110" class="w-full h-full">
+          <path d="M24 55 C60 22 120 22 156 55 C120 88 60 88 24 55 Z" fill="none" stroke="#378136" stroke-width="3"/>
+          <path d="M40 55 L140 55 M65 36 L115 74 M65 74 L115 36" stroke="#43bc65" stroke-width="2" opacity="0.7"/>
+        </svg>`
+      }
+    ];
+
+    // =========================================================================
+    // 2. APPLICATION STATE & SPLINE PATHS
+    // =========================================================================
+    const state = {
+      playing: false,
+      bpm: 72,
+      phase: 0,
+      lastTime: null,
+      selectedIdx: 7,
+      xray: false,
+      zoomed: false,
+      dark: false,
+      sound: false,
+      audioCtx: null,
+      lubDone: false,
+      dubDone: false,
+      ecgPoints: new Array(70).fill(18),
+      ecgTick: 0
+    };
+
+    // Continuous Circulatory Path Waypoints
+    const LOOP_WAYPOINTS = [
+      { x: 265, y: 480, oxy: 0.0 },
+      { x: 252, y: 340, oxy: 0.0 },
+      { x: 315, y: 235, oxy: 0.0 },
+      { x: 390, y: 218, oxy: 0.0 }, // Vena Cava
+      { x: 382, y: 304, oxy: 0.0 }, // Right Atrium
+      { x: 400, y: 390, oxy: 0.0 }, // Right Ventricle
+      { x: 432, y: 258, oxy: 0.0 }, // Pulmonary Trunk
+      { x: 378, y: 196, oxy: 0.25 }, // Lung Entry
+      { x: 450, y: 185, oxy: 0.75 }, // Alveolar Exchange
+      { x: 545, y: 278, oxy: 1.0 }, // Pulmonary Veins
+      { x: 506, y: 304, oxy: 1.0 }, // Left Atrium
+      { x: 492, y: 392, oxy: 1.0 }, // Left Ventricle
+      { x: 472, y: 202, oxy: 1.0 }, // Aortic Arch
+      { x: 585, y: 245, oxy: 1.0 },
+      { x: 652, y: 395, oxy: 0.9 },
+      { x: 580, y: 565, oxy: 0.65 },
+      { x: 450, y: 594, oxy: 0.35 }, // Body Tissues
+      { x: 325, y: 565, oxy: 0.1 }
+    ];
+
+    const particles = [];
+
+    // =========================================================================
+    // 3. LUMINOUS BLOOD CORPUSCLES + TRAILS
+    // =========================================================================
+    function initBloodStream() {
+      const layer = document.getElementById('blood-stream-layer');
+      layer.innerHTML = '';
+      const count = 42;
+
+      for (let i = 0; i < count; i++) {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const trail = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+
+        dot.setAttribute('r', i % 4 === 0 ? '4.6' : '3.6');
+        dot.setAttribute('stroke', '#ffffff');
+        dot.setAttribute('stroke-width', '0.9');
+
+        trail.setAttribute('stroke-width', '2.5');
+        trail.setAttribute('stroke-linecap', 'round');
+        trail.setAttribute('opacity', '0.45');
+
+        g.appendChild(trail);
+        g.appendChild(dot);
+        layer.appendChild(g);
+
+        particles.push({
+          t: i / count,
+          dot,
+          trail,
+          prevX: 450,
+          prevY: 360
+        });
+      }
+      renderParticles(0);
+    }
+
+    function sampleLoop(t) {
+      const n = LOOP_WAYPOINTS.length;
+      const scaled = (((t % 1) + 1) % 1) * n;
+      const i = Math.floor(scaled);
+      const frac = scaled - i;
+      const p1 = LOOP_WAYPOINTS[i % n];
+      const p2 = LOOP_WAYPOINTS[(i + 1) % n];
+
+      return {
+        x: p1.x + (p2.x - p1.x) * frac,
+        y: p1.y + (p2.y - p1.y) * frac,
+        oxy: p1.oxy + (p2.oxy - p1.oxy) * frac
+      };
+    }
+
+    function renderParticles(step) {
+      for (const p of particles) {
+        const prev = sampleLoop(p.t - 0.012);
+        p.t = (p.t + step) % 1;
+        const curr = sampleLoop(p.t);
+
+        // Smooth blend between Venous Sage (#5e7a6d) and Arterial Terracotta Crimson (#c3503c)
+        const r = Math.round(94 + (195 - 94) * curr.oxy);
+        const g = Math.round(122 + (80 - 122) * curr.oxy);
+        const b = Math.round(109 + (60 - 109) * curr.oxy);
+        const color = `rgb(${r},${g},${b})`;
+
+        p.dot.setAttribute('cx', curr.x.toFixed(1));
+        p.dot.setAttribute('cy', curr.y.toFixed(1));
+        p.dot.setAttribute('fill', color);
+
+        p.trail.setAttribute('x1', prev.x.toFixed(1));
+        p.trail.setAttribute('y1', prev.y.toFixed(1));
+        p.trail.setAttribute('x2', curr.x.toFixed(1));
+        p.trail.setAttribute('y2', curr.y.toFixed(1));
+        p.trail.setAttribute('stroke', color);
+      }
+    }
+
+    // =========================================================================
+    // 4. WEB AUDIO LUB-DUB & DEFIBRILLATOR SOUND SYNTH
+    // =========================================================================
+    function playHeartTone(type) {
+      if (!state.sound) return;
+      try {
+        if (!state.audioCtx) {
+          state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (state.audioCtx.state === 'suspended') state.audioCtx.resume();
+
+        const now = state.audioCtx.currentTime;
+        const osc = state.audioCtx.createOscillator();
+        const gain = state.audioCtx.createGain();
+
+        if (type === 'shock') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(140, now);
+          osc.frequency.exponentialRampToValueAtTime(520, now + 0.18);
+          osc.frequency.exponentialRampToValueAtTime(60, now + 0.42);
+          gain.gain.setValueAtTime(0.24, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.44);
+          osc.connect(gain);
+          gain.connect(state.audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.45);
+          return;
+        }
+
+        osc.type = 'sine';
+        if (type === 'lub') {
+          osc.frequency.setValueAtTime(92, now);
+          osc.frequency.exponentialRampToValueAtTime(38, now + 0.14);
+          gain.gain.setValueAtTime(0.32, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        } else {
+          osc.frequency.setValueAtTime(125, now);
+          osc.frequency.exponentialRampToValueAtTime(48, now + 0.11);
+          gain.gain.setValueAtTime(0.24, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        }
+
+        osc.connect(gain);
+        gain.connect(state.audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.16);
+      } catch (err) {
+        // Ignore blocked audio before gesture
+      }
+    }
+
+    // =========================================================================
+    // 5. CARDIAC BIOMECHANICS, VALVES & ECG WAVEFORM
+    // =========================================================================
+    function updateCardiacCycle(phase) {
+      const atria = document.getElementById('atria-group');
+      const ventricles = document.getElementById('ventricles-group');
+      const saSpark = document.getElementById('sa-node-spark');
+      const waveRing = document.getElementById('pulse-wave-ring');
+
+      let atrialScale = 1;
+      let ventScale = 1;
+      let avOpen = true;
+      let semiOpen = false;
+
+      // 1. Atrial Systole (0.04 - 0.18)
+      if (phase >= 0.04 && phase < 0.18) {
+        const s = Math.sin(((phase - 0.04) / 0.14) * Math.PI);
+        atrialScale = 1 - 0.065 * s;
+        ventScale = 1 + 0.025 * s;
+        saSpark.setAttribute('r', (5 + s * 5).toFixed(1));
+      } else {
+        saSpark.setAttribute('r', '5');
+      }
+
+      // 2. Ventricular Systole (0.22 - 0.54) -> "LUB"
+      if (phase >= 0.22 && phase < 0.54) {
+        const s = Math.sin(((phase - 0.22) / 0.32) * Math.PI);
+        ventScale = 1 - 0.095 * s;
+        atrialScale = 1 + 0.03 * s;
+        avOpen = false;
+        semiOpen = true;
+
+        if (!state.lubDone) {
+          state.lubDone = true;
+          playHeartTone('lub');
+        }
+
+        const waveProg = (phase - 0.22) / 0.32;
+        waveRing.setAttribute('r', (85 + waveProg * 95).toFixed(1));
+        waveRing.setAttribute('opacity', ((1 - waveProg) * 0.55).toFixed(2));
+      } else {
+        waveRing.setAttribute('opacity', '0');
+      }
+
+      // 3. Ventricular Diastole -> "DUB" at 0.54
+      if (phase >= 0.54 && !state.dubDone) {
+        state.dubDone = true;
+        playHeartTone('dub');
+      }
+
+      atria.setAttribute('transform', `translate(442, 304) scale(${atrialScale.toFixed(4)}) translate(-442, -304)`);
+      ventricles.setAttribute('transform', `translate(442, 396) scale(${ventScale.toFixed(4)}) translate(-442, -396)`);
+
+      // Valve Flaps
+      document.getElementById('flap-tri-1').setAttribute('y2', avOpen ? '364' : '344');
+      document.getElementById('flap-tri-2').setAttribute('y2', avOpen ? '364' : '344');
+      document.getElementById('flap-mit-1').setAttribute('y2', avOpen ? '364' : '344');
+      document.getElementById('flap-mit-2').setAttribute('y2', avOpen ? '364' : '344');
+
+      document.getElementById('flap-pulm-1').setAttribute('y2', semiOpen ? '296' : '316');
+      document.getElementById('flap-pulm-2').setAttribute('y2', semiOpen ? '296' : '316');
+      document.getElementById('flap-aort-1').setAttribute('y2', semiOpen ? '296' : '316');
+      document.getElementById('flap-aort-2').setAttribute('y2', semiOpen ? '296' : '316');
+    }
+
+    function updateECG(phase) {
+      let y = 18;
+      if (phase >= 0.06 && phase < 0.14) {
+        y = 18 - 4.5 * Math.sin(((phase - 0.06) / 0.08) * Math.PI);
+      } else if (phase >= 0.19 && phase < 0.21) {
+        y = 21;
+      } else if (phase >= 0.21 && phase < 0.25) {
+        y = 18 - 16 * Math.sin(((phase - 0.21) / 0.04) * Math.PI);
+      } else if (phase >= 0.25 && phase < 0.28) {
+        y = 24;
+      } else if (phase >= 0.42 && phase < 0.56) {
+        y = 18 - 5.5 * Math.sin(((phase - 0.42) / 0.14) * Math.PI);
+      }
+
+      state.ecgPoints.push(y);
+      if (state.ecgPoints.length > 70) state.ecgPoints.shift();
+
+      const pts = state.ecgPoints
+        .map((val, idx) => `${((idx / 69) * 140).toFixed(1)},${val.toFixed(1)}`)
+        .join(' ');
+      document.getElementById('ecg-line').setAttribute('points', pts);
+    }
+
+    function loop(ts) {
+      if (!state.lastTime) state.lastTime = ts;
+      const dt = Math.min((ts - state.lastTime) / 1000, 0.1);
+      state.lastTime = ts;
+
+      if (state.playing) {
+        const bps = state.bpm / 60;
+        const prev = state.phase;
+        state.phase = (state.phase + dt * bps) % 1;
+
+        if (state.phase < prev) {
+          state.lubDone = false;
+          state.dubDone = false;
+        }
+
+        const surge = state.phase >= 0.22 && state.phase <= 0.54 ? 1.85 : 0.65;
+        renderParticles(dt * bps * 0.135 * surge);
+        updateCardiacCycle(state.phase);
+        updateECG(state.phase);
+      }
+
+      requestAnimationFrame(loop);
+    }
+
+    // =========================================================================
+    // 6. COMPACT FLOATING INSPECTOR & INTERACTIONS
+    // =========================================================================
+    function selectPart(index) {
+      const normalized = ((index % ANATOMY.length) + ANATOMY.length) % ANATOMY.length;
+      state.selectedIdx = normalized;
+      const item = ANATOMY[normalized];
+
+      document.getElementById('card-title').textContent = item.title;
+      document.getElementById('card-tagline').textContent = item.tagline;
+      document.getElementById('card-step').textContent = `${String(normalized + 1).padStart(2, '0')} / ${ANATOMY.length}`;
+      document.getElementById('card-visual').innerHTML = item.svg;
+      document.getElementById('metric-o2').textContent = item.o2;
+      document.getElementById('metric-bp').textContent = item.bp;
+      document.getElementById('metric-next').textContent = item.next;
+      document.getElementById('card-desc').textContent = item.desc;
+
+      const badge = document.getElementById('card-badge');
+      badge.textContent = item.badge;
+      badge.style.backgroundColor = `${item.badgeColor}20`;
+      badge.style.color = item.badgeColor;
+
+      document.querySelectorAll('.heart-part').forEach((el) => {
+        el.classList.toggle('selected', el.getAttribute('data-part') === item.id);
+      });
+    }
+
+    function initUI() {
+      // Anatomy Part Clicks
+      document.querySelectorAll('.heart-part').forEach((el) => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = el.getAttribute('data-part');
+          const idx = ANATOMY.findIndex((x) => x.id === id);
+          if (idx !== -1) selectPart(idx);
+        });
+      });
+
+      document.getElementById('btn-next-part').addEventListener('click', () => selectPart(state.selectedIdx + 1));
+      document.getElementById('btn-prev-part').addEventListener('click', () => selectPart(state.selectedIdx - 1));
+
+      // Play / Pause Toggle
+      const btnPlay = document.getElementById('btn-play');
+      btnPlay.addEventListener('click', () => {
+        state.playing = !state.playing;
+        document.getElementById('play-label').textContent = state.playing ? 'PAUSE' : 'PUMP HEART';
+        document.getElementById('icon-play').classList.toggle('hidden', state.playing);
+        document.getElementById('icon-pause').classList.toggle('hidden', !state.playing);
+      });
+
+      // BPM Slider & Pace Chips
+      const slider = document.getElementById('bpm-slider');
+      const bpmVal = document.getElementById('bpm-val');
+      const setBpm = (val) => {
+        state.bpm = Number(val);
+        slider.value = state.bpm;
+        bpmVal.textContent = state.bpm;
+      };
+
+      slider.addEventListener('input', (e) => setBpm(e.target.value));
+
+      document.querySelectorAll('.pace-chip').forEach((chip) => {
+        chip.addEventListener('click', () => {
+          setBpm(chip.getAttribute('data-bpm'));
+          if (!state.playing) btnPlay.click();
+        });
+      });
+
+      // Defibrillator Shock Button
+      document.getElementById('btn-shock').addEventListener('click', () => {
+        const flash = document.getElementById('shock-flash');
+        flash.classList.remove('shock-overlay-active');
+        void flash.offsetWidth;
+        flash.classList.add('shock-overlay-active');
+
+        state.phase = 0.22;
+        state.lubDone = false;
+        state.dubDone = false;
+        playHeartTone('shock');
+        if (!state.playing) btnPlay.click();
+      });
+
+      // Full Body vs Close-Up Zoom Toggle
+      const btnView = document.getElementById('btn-view-mode');
+      const stageSvg = document.getElementById('main-stage-svg');
+      btnView.addEventListener('click', () => {
+        state.zoomed = !state.zoomed;
+        if (state.zoomed) {
+          stageSvg.setAttribute('viewBox', '280 140 340 365');
+          btnView.textContent = 'Heart Zoom';
+        } else {
+          stageSvg.setAttribute('viewBox', '0 0 900 660');
+          btnView.textContent = 'Full Body';
+        }
+      });
+
+      // X-Ray Cutaway Mode Toggle
+      const btnXray = document.getElementById('btn-xray');
+      const shell = document.getElementById('epicardium-shell');
+      btnXray.addEventListener('click', () => {
+        state.xray = !state.xray;
+        shell.style.opacity = state.xray ? '0.12' : '1';
+        btnXray.classList.toggle('bg-[#43bc65]/20', state.xray);
+        btnXray.classList.toggle('text-[#43bc65]', state.xray);
+      });
+
+      // Dark / Light Studio Theme Toggle
+      const btnTheme = document.getElementById('btn-theme');
+      const themeLabel = document.getElementById('theme-label');
+      btnTheme.addEventListener('click', () => {
+        state.dark = !state.dark;
+        document.body.classList.toggle('dark-stage', state.dark);
+        themeLabel.textContent = state.dark ? 'Light' : 'Dark';
+      });
+
+      // Audio Toggle
+      document.getElementById('btn-sound').addEventListener('click', () => {
+        state.sound = !state.sound;
+        document.getElementById('icon-muted').classList.toggle('hidden', state.sound);
+        document.getElementById('icon-unmuted').classList.toggle('hidden', !state.sound);
+      });
+
+      // Interactive 3D Parallax Tilt on Mouse Move
+      const stageContainer = document.getElementById('stage-container');
+      const rig = document.getElementById('heart-3d-rig');
+      stageContainer.addEventListener('mousemove', (e) => {
+        const rect = stageContainer.getBoundingClientRect();
+        const nx = (e.clientX - rect.left) / rect.width - 0.5;
+        const ny = (e.clientY - rect.top) / rect.height - 0.5;
+        rig.style.transform = `rotateY(${(nx * 14).toFixed(2)}deg) rotateX(${(-ny * 12).toFixed(2)}deg)`;
+      });
+      stageContainer.addEventListener('mouseleave', () => {
+        rig.style.transform = 'rotateY(0deg) rotateX(0deg)';
+      });
+
+      // Boot Simulator
+      initBloodStream();
+      selectPart(7);
+      requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('DOMContentLoaded', initUI);
+  </script>
+</body>
+</html>
