@@ -1,0 +1,1582 @@
+
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --color-emerald: #43bc65;
+      --color-terracotta: #c3503c;
+      --color-forest: #378136;
+      --color-sage: #738576;
+    }
+
+    body {
+      background-color: #f6f8f6;
+      color: #131c16;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Subtle architectural dot grid background */
+    .bg-editorial-grid {
+      background-image: radial-gradient(rgba(115, 133, 118, 0.22) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    /* Custom sleek scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #eef2ee;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #738576;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #378136;
+    }
+
+    /* Smooth tab transitions */
+    .tab-panel {
+      display: none;
+      animation: fadeSlideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Typing indicator dots */
+    .typing-dot {
+      animation: bounceDot 1.4s infinite ease-in-out both;
+    }
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes bounceDot {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+
+    /* Custom gradient hero banner */
+    .hero-gradient {
+      background: linear-gradient(135deg, #162619 0%, #378136 58%, #284b2c 100%);
+    }
+
+    /* Hide horizontal scrollbar on mobile nav pills */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-editorial-grid min-h-screen flex flex-col selection:bg-emeraldPop selection:text-white">
+
+  <!-- Top Sticky Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-sageSlate/20 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 gap-4">
+        <!-- Brand Logo -->
+        <div class="flex items-center gap-3 shrink-0">
+          <div class="w-10 h-10 rounded-xl bg-forestDeep flex items-center justify-center text-white shadow-md relative overflow-hidden">
+            <div class="absolute -right-2 -bottom-2 w-6 h-6 rounded-full bg-emeraldPop/40"></div>
+            <svg class="w-5 h-5 relative z-10" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+            </svg>
+          </div>
+          <div>
+            <span class="font-extrabold tracking-tight text-inkDark text-base sm:text-lg block leading-none">
+              ANTHROPOCENE <span class="text-emeraldPop">//</span> LAB
+            </span>
+            <span class="text-[11px] font-medium text-sageSlate tracking-wider uppercase">
+              John Green • Interactive Study Suite
+            </span>
+          </div>
+        </div>
+
+        <!-- Desktop Navigation Pills -->
+        <nav class="hidden md:flex items-center bg-canvasLight p-1.5 rounded-2xl border border-sageSlate/20" aria-label="Main Navigation">
+          <button onclick="switchTab('plot')" data-tab="plot" class="nav-btn active px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 bg-forestDeep text-white shadow-sm">
+            Plot &amp; Arc
+          </button>
+          <button onclick="switchTab('essays')" data-tab="essays" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-sageSlate hover:text-inkDark transition-all duration-200">
+            Essay Explorer
+          </button>
+          <button onclick="switchTab('themes')" data-tab="themes" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-sageSlate hover:text-inkDark transition-all duration-200">
+            Themes &amp; Thesis
+          </button>
+          <button onclick="switchTab('chat')" data-tab="chat" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-sageSlate hover:text-inkDark transition-all duration-200 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emeraldPop animate-pulse"></span>
+            Character Chat
+          </button>
+          <button onclick="switchTab('studio')" data-tab="studio" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-sageSlate hover:text-inkDark transition-all duration-200">
+            5-Star Studio
+          </button>
+        </nav>
+
+        <!-- Right Utility Controls (Optional API Key for GitHub Hosting) -->
+        <div class="flex items-center gap-2 shrink-0">
+          <button onclick="toggleApiModal(true)" title="Configure Optional Gemini API Key for GitHub Pages" class="p-2.5 rounded-xl border border-sageSlate/25 bg-white hover:bg-canvasLight text-sageSlate hover:text-forestDeep transition-colors flex items-center gap-1.5 text-xs font-semibold">
+            <svg class="w-4 h-4 text-terracotta" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+            </svg>
+            <span class="hidden sm:inline">AI Key</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Horizontal Scroll Navigation -->
+      <div class="flex md:hidden items-center gap-2 pb-3 overflow-x-auto no-scrollbar">
+        <button onclick="switchTab('plot')" data-tab="plot" class="nav-btn-mobile active shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold bg-forestDeep text-white">
+          Plot &amp; Arc
+        </button>
+        <button onclick="switchTab('essays')" data-tab="essays" class="nav-btn-mobile shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white text-sageSlate border border-sageSlate/20">
+          Essays
+        </button>
+        <button onclick="switchTab('themes')" data-tab="themes" class="nav-btn-mobile shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white text-sageSlate border border-sageSlate/20">
+          Themes &amp; Thesis
+        </button>
+        <button onclick="switchTab('chat')" data-tab="chat" class="nav-btn-mobile shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white text-sageSlate border border-sageSlate/20 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emeraldPop"></span>
+          AI Chat
+        </button>
+        <button onclick="switchTab('studio')" data-tab="studio" class="nav-btn-mobile shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white text-sageSlate border border-sageSlate/20">
+          5-Star Studio
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
+
+    <!-- Hero Banner -->
+    <section class="hero-gradient rounded-3xl p-6 sm:p-10 text-white shadow-card relative overflow-hidden">
+      <!-- Decorative Geometric Orbs in Signature Colors -->
+      <div class="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-emeraldPop/25 blur-2xl pointer-events-none"></div>
+      <div class="absolute -bottom-20 right-1/4 w-72 h-72 rounded-full bg-terracotta/25 blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div class="lg:col-span-8 space-y-4">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-terracotta text-white text-xs font-bold tracking-wide uppercase shadow-md">
+            <span>Hate Reading? Zero Judgement.</span>
+          </div>
+          <h1 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
+            The Anthropocene Reviewed, <span class="text-emeraldPop italic">Decoded.</span>
+          </h1>
+          <p class="text-white/85 text-sm sm:text-base max-w-2xl leading-relaxed">
+            Skip the wall-of-text dread. Explore the structure, decode the biggest themes, inspect John Green’s 5-star ratings on humanity’s weirdest inventions, and chat live with the author and subjects of the book.
+          </p>
+          <div class="pt-2 flex flex-wrap gap-3">
+            <button onclick="switchTab('chat')" class="px-5 py-3 rounded-2xl bg-emeraldPop hover:bg-[#38a657] text-inkDark font-bold text-sm transition-all shadow-glow-green flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+              </svg>
+              Chat with John Green &amp; Cast
+            </button>
+            <button onclick="switchTab('essays')" class="px-5 py-3 rounded-2xl bg-white/12 hover:bg-white/20 backdrop-blur-md border border-white/25 text-white font-semibold text-sm transition-all">
+              Browse Key Essays (TL;DRs)
+            </button>
+          </div>
+        </div>
+
+        <!-- Book Quick-Facts Glass Card -->
+        <div class="lg:col-span-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-white/15 pb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-emeraldPop">ELA Cheat-Sheet Stats</span>
+            <span class="text-xs bg-white/15 px-2.5 py-1 rounded-lg font-medium">Published 2021</span>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-black/20 rounded-xl p-3">
+              <div class="text-2xl font-extrabold text-white">44</div>
+              <div class="text-xs text-white/75">Personal Essays</div>
+            </div>
+            <div class="bg-black/20 rounded-xl p-3">
+              <div class="text-2xl font-extrabold text-emeraldPop">1–5 ★</div>
+              <div class="text-xs text-white/75">Rating Scale</div>
+            </div>
+            <div class="bg-black/20 rounded-xl p-3">
+              <div class="text-2xl font-extrabold text-terracotta">Non-Fiction</div>
+              <div class="text-xs text-white/75">Memoir + History</div>
+            </div>
+            <div class="bg-black/20 rounded-xl p-3">
+              <div class="text-2xl font-extrabold text-white">~3.8 ★</div>
+              <div class="text-xs text-white/75">Avg. Book Rating</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 1: PLOT, NARRATIVE ARC & DATA VISUALIZATION                     -->
+    <!-- =================================================================== -->
+    <section id="tab-plot" class="tab-panel active space-y-8">
+      <!-- Plot Twist Alert Banner -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-sageSlate/20 shadow-card">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-sageSlate/15 pb-6">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-widest text-terracotta">First Thing to Know for Class</span>
+            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-inkDark mt-1">
+              Wait... Does This Book Even Have a "Plot"?
+            </h2>
+          </div>
+          <span class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-canvasLight border border-sageSlate/25 text-xs font-bold text-forestDeep">
+            Genre: Creative Non-Fiction / Essay Collection
+          </span>
+        </div>
+
+        <p class="mt-5 text-sm sm:text-base text-inkDark/80 leading-relaxed">
+          <strong>Spoiler alert:</strong> There are no wizards, love triangles, or murders here. <em>The Anthropocene Reviewed</em> is a collection of <strong>44 true essays</strong> adapted from John Green’s podcast. The word <strong>"Anthropocene"</strong> means the current geological era where <em>humans</em> are the biggest force shaping Earth (climate, cities, extinction, even Diet Dr Pepper). Even without a fictional plot, the book follows a clear <strong>emotional journey</strong> from isolation and cynicism to hope and connection.
+        </p>
+
+        <!-- 3-Act Narrative Arc Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6">
+          <div class="rounded-2xl p-5 bg-canvasLight border-l-4 border-terracotta space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-terracotta">Act I • The Setup</span>
+              <span class="text-xs font-semibold text-sageSlate">Essays 1–14</span>
+            </div>
+            <h3 class="font-bold text-lg text-inkDark">Feeling Small &amp; Overwhelmed</h3>
+            <p class="text-sm text-inkDark/75 leading-relaxed">
+              John introduces the scale of human history—from 17,000-year-old cave paintings to Halley’s Comet. He admits he struggles with severe anxiety and wonders how one small person matters on a planet of 8 billion.
+            </p>
+          </div>
+
+          <div class="rounded-2xl p-5 bg-canvasLight border-l-4 border-sageSlate space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-sageSlate">Act II • The Crisis</span>
+              <span class="text-xs font-semibold text-sageSlate">Essays 15–30</span>
+            </div>
+            <h3 class="font-bold text-lg text-inkDark">Lockdown, Grief &amp; Paradoxes</h3>
+            <p class="text-sm text-inkDark/75 leading-relaxed">
+              Written heavily during the 2020 COVID-19 pandemic, the middle section confronts heartbreak, extinct species (like the Kauaʻi ʻōʻō bird), and how humans create miracles (vaccines) while also causing destruction.
+            </p>
+          </div>
+
+          <div class="rounded-2xl p-5 bg-canvasLight border-l-4 border-emeraldPop space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-forestDeep">Act III • Resolution</span>
+              <span class="text-xs font-semibold text-sageSlate">Essays 31–44</span>
+            </div>
+            <h3 class="font-bold text-lg text-inkDark">Falling in Love with the World</h3>
+            <p class="text-sm text-inkDark/75 leading-relaxed">
+              Instead of giving into cynicism, John decides that <strong>paying deep attention</strong> to ordinary things—sunsets, sports anthems, friendship—is an act of hope. The book closes with <em>"Auld Lang Syne"</em> (5 stars).
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive D3 Data Visualization + Teacher Exam Questions -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- D3 Chart Card -->
+        <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-sageSlate/20 shadow-card flex flex-col justify-between">
+          <div>
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <h3 class="font-serif text-xl font-bold text-inkDark">John’s Rating Universe (Interactive Map)</h3>
+              <span class="text-xs font-semibold px-3 py-1 rounded-full bg-emeraldPop/15 text-forestDeep">Click any circle to inspect</span>
+            </div>
+            <p class="text-xs sm:text-sm text-sageSlate mb-4">
+              Notice the pattern: John rarely gives 1 star. Even messy, painful parts of life get high ratings if they make us feel deeply human.
+            </p>
+          </div>
+
+          <!-- Responsive D3 Container -->
+          <div id="d3-chart-wrapper" class="w-full h-72 sm:h-80 bg-canvasLight rounded-2xl border border-sageSlate/15 relative overflow-hidden"></div>
+
+          <!-- Selected Bubble Readout -->
+          <div id="chart-readout" class="mt-4 p-4 rounded-2xl bg-forestDeep text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span class="text-[11px] uppercase tracking-wider text-emeraldPop font-bold block">Selected Essay Spotlight</span>
+              <span id="readout-title" class="font-bold text-base">The Kauaʻi ʻōʻō — ★★★★★ (5.0 Stars)</span>
+              <p id="readout-desc" class="text-xs text-white/80 mt-0.5">A heartbreaking tribute to an extinct Hawaiian songbird whose last male sang a duet to an empty forest.</p>
+            </div>
+            <button onclick="switchTab('essays')" class="shrink-0 px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-xs font-bold transition">
+              Read TL;DR →
+            </button>
+          </div>
+        </div>
+
+        <!-- 3 Things Your ELA Teacher Will Ask -->
+        <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-sageSlate/20 shadow-card space-y-4">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-terracotta/15 text-terracotta flex items-center justify-center font-extrabold">
+              !
+            </div>
+            <div>
+              <h3 class="font-serif text-xl font-bold text-inkDark">3 Instant Class Answers</h3>
+              <p class="text-xs text-sageSlate">Say these out loud and sound like you read every page.</p>
+            </div>
+          </div>
+
+          <div class="space-y-3 pt-1">
+            <div class="p-4 rounded-2xl bg-canvasLight border border-sageSlate/20 space-y-1.5">
+              <div class="text-xs font-bold text-forestDeep uppercase">Q1: Why use a 5-star Yelp scale for serious topics?</div>
+              <p class="text-sm text-inkDark/80 leading-relaxed">
+                <strong>Your Answer:</strong> "It’s ironic on purpose. Using a consumer internet rating scale on things like sunsets or plagues shows how absurd it is to measure human experiences—yet rating forces us to decide what we truly value."
+              </p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-canvasLight border border-sageSlate/20 space-y-1.5">
+              <div class="text-xs font-bold text-terracotta uppercase">Q2: How does the book blend memoir and research?</div>
+              <p class="text-sm text-inkDark/80 leading-relaxed">
+                <strong>Your Answer:</strong> "Every essay starts with weird historical or scientific trivia, then zooms in on John Green’s personal memories, showing that huge global events always hit individuals in deeply personal ways."
+              </p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-canvasLight border border-sageSlate/20 space-y-1.5">
+              <div class="text-xs font-bold text-sageSlate uppercase">Q3: What is the book’s ultimate message about hope?</div>
+              <p class="text-sm text-inkDark/80 leading-relaxed">
+                <strong>Your Answer:</strong> "Cynicism feels smart, but it’s lazy. Hope isn’t ignoring bad news—it’s paying attention to beauty anyway and refusing to give up on each other."
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 2: INTERACTIVE ESSAY EXPLORER                                   -->
+    <!-- =================================================================== -->
+    <section id="tab-essays" class="tab-panel space-y-6">
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-sageSlate/20 shadow-card">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-widest text-emeraldPop">Zero-Fluff Breakdown</span>
+            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-inkDark mt-1">Top 10 Must-Know Essays</h2>
+            <p class="text-sm text-sageSlate mt-1">Click stars on any card to add <strong>your own rating</strong> and compare it with John’s!</p>
+          </div>
+
+          <!-- Search & Filter Controls -->
+          <div class="flex flex-col sm:flex-row gap-3">
+            <input
+              id="essay-search"
+              type="text"
+              placeholder="Search essays (e.g., geese, soda, comet)..."
+              oninput="renderEssays()"
+              class="px-4 py-2.5 rounded-2xl bg-canvasLight border border-sageSlate/25 text-sm focus:outline-none focus:border-forestDeep w-full sm:w-64"
+            />
+            <select
+              id="essay-filter"
+              onchange="renderEssays()"
+              class="px-4 py-2.5 rounded-2xl bg-canvasLight border border-sageSlate/25 text-sm font-semibold text-inkDark focus:outline-none focus:border-forestDeep"
+            >
+              <option value="all">All Categories</option>
+              <option value="5star">5-Star Masterpieces</option>
+              <option value="nature">Nature &amp; Science</option>
+              <option value="culture">Pop Culture &amp; Everyday</option>
+              <option value="personal">Deeply Personal</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic Essay Cards Grid -->
+      <div id="essays-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 3: THEMES, QUOTES & AI THESIS LAB                               -->
+    <!-- =================================================================== -->
+    <section id="tab-themes" class="tab-panel space-y-8">
+      <!-- 4 Core Themes Grid (Using all 4 signature palette colors!) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Theme 1: #43bc65 -->
+        <div class="bg-white rounded-3xl p-6 border-t-4 border-emeraldPop shadow-card space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-3 py-1 rounded-full bg-emeraldPop/15 text-forestDeep text-xs font-extrabold uppercase">Theme 01</span>
+            <span class="text-xs font-semibold text-sageSlate">Essays: Kauaʻi ʻōʻō, Lascaux</span>
+          </div>
+          <h3 class="font-serif text-xl font-bold text-inkDark">Attention as an Act of Love</h3>
+          <p class="text-sm text-inkDark/80 leading-relaxed">
+            Borrowing poet Mary Oliver’s line <em>"Paying attention is the beginning of devotion,"</em> Green argues that truly noticing the world—whether a cave painting or a stray goose—is how we fall in love with being alive.
+          </p>
+          <blockquote class="p-3.5 rounded-2xl bg-canvasLight border-l-2 border-emeraldPop font-serif italic text-xs sm:text-sm text-inkDark/90">
+            “We’re all just trying to figure out how to fall in love with the world despite its brokenness.”
+          </blockquote>
+        </div>
+
+        <!-- Theme 2: #c3503c -->
+        <div class="bg-white rounded-3xl p-6 border-t-4 border-terracotta shadow-card space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-3 py-1 rounded-full bg-terracotta/15 text-terracotta text-xs font-extrabold uppercase">Theme 02</span>
+            <span class="text-xs font-semibold text-sageSlate">Essays: The Internet, Plague</span>
+          </div>
+          <h3 class="font-serif text-xl font-bold text-inkDark">Hope vs. Easy Cynicism</h3>
+          <p class="text-sm text-inkDark/80 leading-relaxed">
+            In modern culture, acting cynical and unimpressed makes you look smart. Green pushes back: cynicism protects you from disappointment, but genuine hope takes real courage because vulnerability hurts.
+          </p>
+          <blockquote class="p-3.5 rounded-2xl bg-canvasLight border-l-2 border-terracotta font-serif italic text-xs sm:text-sm text-inkDark/90">
+            “Cynicism is a shield, and like all shields, it restricts what you can hold.”
+          </blockquote>
+        </div>
+
+        <!-- Theme 3: #378136 -->
+        <div class="bg-white rounded-3xl p-6 border-t-4 border-forestDeep shadow-card space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-3 py-1 rounded-full bg-forestDeep/15 text-forestDeep text-xs font-extrabold uppercase">Theme 03</span>
+            <span class="text-xs font-semibold text-sageSlate">Essays: You'll Never Walk Alone</span>
+          </div>
+          <h3 class="font-serif text-xl font-bold text-inkDark">Radical Human Connection</h3>
+          <p class="text-sm text-inkDark/80 leading-relaxed">
+            Humans are fragile alone, yet together we create shared rituals—singing stadium anthems, ringing in New Year’s Eve, or sharing inside jokes—that carry each other through grief.
+          </p>
+          <blockquote class="p-3.5 rounded-2xl bg-canvasLight border-l-2 border-forestDeep font-serif italic text-xs sm:text-sm text-inkDark/90">
+            “There is no ‘I’ in Anthropocene, and there is no ‘I’ in human.”
+          </blockquote>
+        </div>
+
+        <!-- Theme 4: #738576 -->
+        <div class="bg-white rounded-3xl p-6 border-t-4 border-sageSlate shadow-card space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-3 py-1 rounded-full bg-sageSlate/20 text-inkDark text-xs font-extrabold uppercase">Theme 04</span>
+            <span class="text-xs font-semibold text-sageSlate">Essays: Halley's Comet, Geese</span>
+          </div>
+          <h3 class="font-serif text-xl font-bold text-inkDark">The Paradox of the Anthropocene</h3>
+          <p class="text-sm text-inkDark/80 leading-relaxed">
+            Humanity is simultaneously the greatest force of creativity and the greatest force of ecological disruption on Earth. We are both tiny specks in cosmic time and geological giants.
+          </p>
+          <blockquote class="p-3.5 rounded-2xl bg-canvasLight border-l-2 border-sageSlate font-serif italic text-xs sm:text-sm text-inkDark/90">
+            “We are at once far too powerful and not nearly powerful enough.”
+          </blockquote>
+        </div>
+      </div>
+
+      <!-- AI ELA Thesis & Discussion Brainstormer -->
+      <div class="bg-inkDark text-white rounded-3xl p-6 sm:p-8 shadow-card relative overflow-hidden">
+        <div class="absolute right-0 top-0 w-72 h-72 bg-emeraldPop/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-widest text-emeraldPop">AI Study Assistant</span>
+              <h3 class="font-serif text-2xl font-bold mt-1">ELA Thesis &amp; Discussion Builder</h3>
+            </div>
+            <span class="text-xs bg-white/10 px-3 py-1.5 rounded-xl text-white/80">Powered by Gemini</span>
+          </div>
+
+          <p class="text-sm text-white/75 max-w-2xl">
+            Stuck on an ELA prompt or class discussion question? Pick a focus or paste your teacher’s question below to generate an A+ thesis angle, evidence from the book, and a discussion point.
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-3">
+            <input
+              id="thesis-prompt-input"
+              type="text"
+              placeholder="e.g., How does John Green use humor to talk about serious topics?"
+              class="flex-1 px-4 py-3.5 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/45 text-sm focus:outline-none focus:border-emeraldPop"
+            />
+            <button
+              id="thesis-btn"
+              onclick="generateThesisHelp()"
+              class="px-6 py-3.5 rounded-2xl bg-emeraldPop hover:bg-[#38a657] text-inkDark font-bold text-sm transition-all shrink-0 shadow-glow-green"
+            >
+              Build ELA Outline
+            </button>
+          </div>
+
+          <!-- Quick Prompt Chips -->
+          <div class="flex flex-wrap gap-2">
+            <button onclick="setThesisPrompt('Why does John Green rate everything on a 5-star scale?')" class="text-xs px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white/85 transition">
+              + Why the 5-star scale?
+            </button>
+            <button onclick="setThesisPrompt('How does the book address climate change and human responsibility?')" class="text-xs px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white/85 transition">
+              + Climate &amp; responsibility
+            </button>
+            <button onclick="setThesisPrompt('Compare two essays that show hope in dark times.')" class="text-xs px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white/85 transition">
+              + Hope in dark times
+            </button>
+          </div>
+
+          <!-- AI Thesis Output Box -->
+          <div id="thesis-output" class="hidden p-5 rounded-2xl bg-white/8 border border-white/15 space-y-3 text-sm leading-relaxed text-white/90"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 4: INTERACTIVE AI CHARACTER & SUBJECT CHAT                      -->
+    <!-- =================================================================== -->
+    <section id="tab-chat" class="tab-panel">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Character Roster Sidebar -->
+        <div class="lg:col-span-4 bg-white rounded-3xl p-5 border border-sageSlate/20 shadow-card space-y-4">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-terracotta">Choose Your Conversation</span>
+            <h2 class="font-serif text-xl font-bold text-inkDark mt-0.5">Talk to the Book</h2>
+            <p class="text-xs text-sageSlate mt-1">
+              Since this is non-fiction, chat directly with John Green or the iconic subjects he reviews!
+            </p>
+          </div>
+
+          <div id="character-list" class="space-y-2.5"></div>
+        </div>
+
+        <!-- Live Chat Console -->
+        <div class="lg:col-span-8 bg-white rounded-3xl border border-sageSlate/20 shadow-card flex flex-col h-[560px] overflow-hidden">
+          <!-- Chat Header -->
+          <div id="chat-header" class="p-4 sm:p-5 bg-forestDeep text-white flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div id="chat-avatar" class="w-11 h-11 rounded-2xl bg-emeraldPop text-inkDark font-extrabold flex items-center justify-center text-lg shadow">
+                JG
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 id="chat-name" class="font-bold text-base">John Green</h3>
+                  <span id="chat-badge" class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white/15 text-emeraldPop">Author</span>
+                </div>
+                <p id="chat-tagline" class="text-xs text-white/80">Overthinking Diet Dr Pepper, mortality, and why paying attention matters.</p>
+              </div>
+            </div>
+            <button onclick="resetChat()" class="px-3 py-1.5 rounded-xl bg-white/12 hover:bg-white/20 text-xs font-semibold transition">
+              Clear Chat
+            </button>
+          </div>
+
+          <!-- Messages Feed -->
+          <div id="chat-messages" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 bg-canvasLight/60"></div>
+
+          <!-- Quick-Tap Conversation Starters -->
+          <div id="chat-starters" class="px-4 py-2.5 bg-white border-t border-sageSlate/15 flex items-center gap-2 overflow-x-auto no-scrollbar"></div>
+
+          <!-- Message Input Form -->
+          <form onsubmit="handleChatSubmit(event)" class="p-3 sm:p-4 bg-white border-t border-sageSlate/20 flex items-center gap-2.5">
+            <input
+              id="chat-input"
+              type="text"
+              autocomplete="off"
+              placeholder="Ask anything about the book, themes, or life..."
+              class="flex-1 px-4 py-3 rounded-2xl bg-canvasLight border border-sageSlate/25 text-sm focus:outline-none focus:border-forestDeep"
+            />
+            <button
+              type="submit"
+              id="chat-send-btn"
+              class="px-5 py-3 rounded-2xl bg-forestDeep hover:bg-emeraldPop hover:text-inkDark text-white font-bold text-sm transition-all flex items-center gap-1.5 shrink-0"
+            >
+              <span>Send</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+              </svg>
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 5: 5-STAR ANTHROPOCENE REVIEW STUDIO                            -->
+    <!-- =================================================================== -->
+    <section id="tab-studio" class="tab-panel">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Input Studio -->
+        <div class="lg:col-span-5 bg-white rounded-3xl p-6 sm:p-8 border border-sageSlate/20 shadow-card space-y-5">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-widest text-terracotta">Creative ELA Project</span>
+            <h2 class="font-serif text-2xl font-bold text-inkDark mt-1">Review Your Own World</h2>
+            <p class="text-sm text-sageSlate mt-1">
+              Teachers <em>love</em> assigning "Write your own Anthropocene Review." Pick any everyday object or moment from your life, choose a star rating, and generate a John Green-style micro-essay!
+            </p>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-inkDark mb-1.5">What are you reviewing?</label>
+              <input
+                id="studio-topic"
+                type="text"
+                placeholder="e.g., 7:30 AM School Bells, Iced Coffee, AirPods, Snow Days..."
+                class="w-full px-4 py-3 rounded-2xl bg-canvasLight border border-sageSlate/25 text-sm focus:outline-none focus:border-forestDeep"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-inkDark mb-1.5">Your Star Rating (1 to 5)</label>
+              <div id="studio-stars" class="flex items-center gap-2">
+                <button type="button" onclick="setStudioRating(1)" class="studio-star-btn w-11 h-11 rounded-xl border border-sageSlate/25 font-bold text-base transition">1★</button>
+                <button type="button" onclick="setStudioRating(2)" class="studio-star-btn w-11 h-11 rounded-xl border border-sageSlate/25 font-bold text-base transition">2★</button>
+                <button type="button" onclick="setStudioRating(3)" class="studio-star-btn w-11 h-11 rounded-xl border border-sageSlate/25 font-bold text-base transition">3★</button>
+                <button type="button" onclick="setStudioRating(4)" class="studio-star-btn w-11 h-11 rounded-xl border border-sageSlate/25 font-bold text-base transition bg-emeraldPop text-inkDark border-emeraldPop">4★</button>
+                <button type="button" onclick="setStudioRating(5)" class="studio-star-btn w-11 h-11 rounded-xl border border-sageSlate/25 font-bold text-base transition">5★</button>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-inkDark mb-1.5">Personal Memory or Vibe (Optional)</label>
+              <input
+                id="studio-memory"
+                type="text"
+                placeholder="e.g., Walking to class when it's freezing outside..."
+                class="w-full px-4 py-3 rounded-2xl bg-canvasLight border border-sageSlate/25 text-sm focus:outline-none focus:border-forestDeep"
+              />
+            </div>
+
+            <button
+              id="studio-generate-btn"
+              onclick="generateCustomReview()"
+              class="w-full py-3.5 rounded-2xl bg-forestDeep hover:bg-emeraldPop hover:text-inkDark text-white font-bold text-sm transition-all shadow-md"
+            >
+              Generate My Anthropocene Review
+            </button>
+          </div>
+        </div>
+
+        <!-- Generated Editorial Essay Card -->
+        <div class="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-10 border border-sageSlate/20 shadow-card relative">
+          <div class="flex items-center justify-between border-b border-sageSlate/15 pb-4 mb-6">
+            <span class="text-xs font-bold uppercase tracking-widest text-sageSlate">Editorial Preview Card</span>
+            <button onclick="copyStudioReview()" class="px-3.5 py-1.5 rounded-xl bg-canvasLight hover:bg-emeraldPop/20 text-forestDeep font-bold text-xs transition flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+              </svg>
+              Copy Essay
+            </button>
+          </div>
+
+          <article id="studio-article" class="space-y-4">
+            <div class="inline-block px-3 py-1 rounded-full bg-terracotta/12 text-terracotta text-xs font-bold">
+              Sample Output • Try Generating Yours
+            </div>
+            <h3 id="studio-out-title" class="font-serif text-2xl sm:text-3xl font-bold text-inkDark">
+              Noise-Canceling Headphones
+            </h3>
+            <div id="studio-out-body" class="font-serif text-base text-inkDark/85 leading-relaxed space-y-4">
+              <p>
+                In 1978, engineer Amar Bose was on a flight from Zurich to Boston when the roar of the jet engines made it impossible to hear his music. Before the plane even landed, he had sketched the mathematical equations for active noise cancellation on a napkin—a quiet rebellion against a loud world.
+              </p>
+              <p>
+                Putting them on in a crowded school hallway feels like stepping underwater: the locker slams and overlapping chatter soften into a distant hum. Yet the Anthropocene irony is that we invented total silence not to escape humanity, but to curate which voices we let into our heads. I give noise-canceling headphones four stars.
+              </p>
+            </div>
+            <div class="pt-4 border-t border-sageSlate/15 flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-sageSlate">Official Verdict</span>
+              <span id="studio-out-stars" class="text-lg font-extrabold text-terracotta tracking-wider">★★★★☆ (4 / 5 Stars)</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer with Portfolio Palette Credit -->
+  <footer class="border-t border-sageSlate/20 bg-white mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-sageSlate">
+      <div class="font-medium">
+        Built as an Interactive Portfolio Project • Companion for <em>The Anthropocene Reviewed</em> by John Green
+      </div>
+      <div class="flex items-center gap-2">
+        <span>Theme Swatches:</span>
+        <span class="w-4 h-4 rounded-full bg-[#43bc65]" title="#43bc65"></span>
+        <span class="w-4 h-4 rounded-full bg-[#c3503c]" title="#c3503c"></span>
+        <span class="w-4 h-4 rounded-full bg-[#378136]" title="#378136"></span>
+        <span class="w-4 h-4 rounded-full bg-[#738576]" title="#738576"></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Custom Non-Blocking Toast Notification -->
+  <div id="toast-box" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="bg-inkDark text-white px-5 py-3.5 rounded-2xl shadow-xl border border-emeraldPop/40 flex items-center gap-3 text-sm font-semibold">
+      <span class="w-2.5 h-2.5 rounded-full bg-emeraldPop"></span>
+      <span id="toast-text">Copied to clipboard!</span>
+    </div>
+  </div>
+
+  <!-- Optional API Key Modal (Helpful when deployed standalone on GitHub Pages) -->
+  <div id="api-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/55 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-sageSlate/25">
+      <div class="flex items-center justify-between">
+        <h3 class="font-serif text-xl font-bold text-inkDark">Gemini AI Settings</h3>
+        <button onclick="toggleApiModal(false)" class="p-1.5 rounded-xl hover:bg-canvasLight text-sageSlate">✕</button>
+      </div>
+      <p class="text-xs sm:text-sm text-inkDark/75 leading-relaxed">
+        In this preview environment, AI works automatically! If you paste this single file onto <strong>GitHub Pages</strong> later, you can optionally paste a free Google AI Studio key here so live chat keeps working on your public portfolio.
+      </p>
+      <input
+        id="custom-api-key-input"
+        type="password"
+        placeholder="Optional: Paste Gemini API Key..."
+        class="w-full px-4 py-3 rounded-2xl bg-canvasLight border border-sageSlate/30 text-sm focus:outline-none focus:border-forestDeep"
+      />
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="toggleApiModal(false)" class="px-4 py-2.5 rounded-xl bg-canvasLight text-inkDark font-semibold text-xs">Close</button>
+        <button onclick="saveCustomApiKey()" class="px-5 py-2.5 rounded-xl bg-forestDeep text-white font-bold text-xs">Save Key</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- JAVASCRIPT APPLICATION LOGIC & GEMINI AI INTEGRATION                -->
+  <!-- =================================================================== -->
+  <script>
+    // Runtime API Key (Automatically injected in Canvas; optional override for GitHub Pages)
+    const apiKey = "";
+    let userOverrideApiKey = "";
+
+    function getActiveApiKey() {
+      return userOverrideApiKey.trim() || apiKey;
+    }
+
+    // -------------------------------------------------------------------
+    // 1. RICH LITERARY DATASET (Authentic to John Green's Book)
+    // -------------------------------------------------------------------
+    const ESSAYS_DATA = [
+      {
+        id: "kauai-oo",
+        title: "The Kauaʻi ʻōʻō",
+        category: "nature",
+        isFiveStar: true,
+        johnRating: 5.0,
+        emotionScore: 95,
+        tldr: "In 1987, biologists recorded the last male Kauaʻi ʻōʻō songbird in Hawaii singing a mating duet—leaving pauses for a female partner who no longer existed because the species had gone extinct.",
+        elaTakeaway: "The emotional heart of the book. Symbolizes irreversible human impact on nature and the tragic beauty of calling out for connection.",
+        quote: "He sang a duet for one, leaving pauses for a partner who would never come."
+      },
+      {
+        id: "ynwa",
+        title: "You’ll Never Walk Alone",
+        category: "culture",
+        isFiveStar: true,
+        johnRating: 5.0,
+        emotionScore: 92,
+        tldr: "Traces the journey of a 1945 Broadway showtune that became the famous stadium anthem of Liverpool Football Club—and a song of solidarity during tragedies and lockdowns.",
+        elaTakeaway: "Shows how pop culture transforms into sacred community ritual when strangers sing together in dark times.",
+        quote: "We need each other to walk through the storm."
+      },
+      {
+        id: "diet-dr-pepper",
+        title: "Diet Dr Pepper",
+        category: "personal",
+        isFiveStar: false,
+        johnRating: 4.5,
+        emotionScore: 76,
+        tldr: "John explores the history of Dr Pepper’s 23 flavors and confesses his deep, slightly embarrassing emotional attachment to cold cans of Diet Dr Pepper during anxious writing nights.",
+        elaTakeaway: "Masterclass in voice and humor: proves tiny, commercial everyday comforts can anchor us during mental health struggles.",
+        quote: "I love Diet Dr Pepper the way I love old friends—not because it is good for me, but because it is mine."
+      },
+      {
+        id: "canada-geese",
+        title: "Canada Geese",
+        category: "nature",
+        isFiveStar: false,
+        johnRating: 2.5,
+        emotionScore: 62,
+        tldr: "Starts by roasting aggressive, hissing geese that take over suburban parks, then reveals they actually mate for life and refuse to abandon an injured partner.",
+        elaTakeaway: "Classic John Green structure: starts with comedy/annoyance and pivots into genuine empathy for non-human creatures.",
+        quote: "They are loud, territorial, and fiercely loyal to one another."
+      },
+      {
+        id: "auld-lang-syne",
+        title: "Auld Lang Syne",
+        category: "personal",
+        isFiveStar: true,
+        johnRating: 5.0,
+        emotionScore: 96,
+        tldr: "The closing essay of the book. Examines Scottish poet Robert Burns’s New Year’s Eve song about remembering old friends and accepting the passage of time.",
+        elaTakeaway: "Resolves the entire book’s arc: even though everything changes and people drift apart, shared memories make life worth celebrating.",
+        quote: "We’re here because we’re here because we’re here."
+      },
+      {
+        id: "halleys-comet",
+        title: "Halley’s Comet",
+        category: "nature",
+        isFiveStar: false,
+        johnRating: 4.5,
+        emotionScore: 81,
+        tldr: "Mark Twain was born and died with Halley’s Comet (75 years apart). In 1986, kid John Green stayed up all night expecting fireworks in the sky and saw only a blurry smudge.",
+        elaTakeaway: "Explores expectation vs. reality, and how cosmic time puts short human lifespans into perspective.",
+        quote: "It wasn’t bright, and it wasn’t dramatic—but it was real, and it was on time."
+      },
+      {
+        id: "lascaux",
+        title: "The Lascaux Cave Paintings",
+        category: "culture",
+        isFiveStar: false,
+        johnRating: 4.5,
+        emotionScore: 85,
+        tldr: "Four teenagers and a dog discovered 17,000-year-old paintings of bulls and horses in a French cave in 1940—art so fragile that human breath began destroying it.",
+        elaTakeaway: "Highlights the paradox of the Anthropocene: our sheer presence can accidentally damage the ancient wonders we love most.",
+        quote: "Before there was writing, there was already the urge to say: We were here."
+      },
+      {
+        id: "the-internet",
+        title: "The Internet",
+        category: "culture",
+        isFiveStar: false,
+        johnRating: 3.0,
+        emotionScore: 70,
+        tldr: "Reflects on the early idealistic days of YouTube and online communities versus how algorithms now monetize outrage and loneliness.",
+        elaTakeaway: "Balanced critical thinking—neither blindly tech-optimist nor totally doomer.",
+        quote: "The internet promised to bring us together, and it did—for better and for worse."
+      },
+      {
+        id: "googling-strangers",
+        title: "Googling Strangers",
+        category: "personal",
+        isFiveStar: false,
+        johnRating: 4.0,
+        emotionScore: 78,
+        tldr: "John finds an old autograph book in a thrift store and searches online for the forgotten teenagers who signed it decades ago, uncovering full, complex lives.",
+        elaTakeaway: "Illustrates 'sonder'—the realization that every random person has a life just as vivid and complicated as your own.",
+        quote: "Everyone you will ever meet knows something you don’t."
+      },
+      {
+        id: "penguins-madagascar",
+        title: "Penguins of Madagascar",
+        category: "culture",
+        isFiveStar: false,
+        johnRating: 3.0,
+        emotionScore: 68,
+        tldr: "Watching a goofy DreamWorks animated spy movie on repeat with his young son Henry becomes a lesson in meeting loved ones where they are.",
+        elaTakeaway: "Shows that 'high art' isn't the only thing that matters; silly movies become priceless when shared with people you love.",
+        quote: "You don’t get to choose what brings comfort to the people you love."
+      }
+    ];
+
+    // User's interactive star ratings stored in memory
+    const userRatings = {};
+
+    // -------------------------------------------------------------------
+    // 2. CHARACTER PERSONAS FOR LIVE GEMINI CHAT
+    // -------------------------------------------------------------------
+    const CHARACTERS = [
+      {
+        id: "john",
+        name: "John Green",
+        role: "The Author",
+        initials: "JG",
+        color: "#378136",
+        tagline: "Anxious, nerdy, deeply empathetic essayist rating the human planet.",
+        greeting: "Hey! Thanks for stopping by. Look, if you’re reading my book for ELA and feeling a little overwhelmed by the sheer weight of the human-centered planet, I completely get it. What essay or question is on your mind?",
+        starters: [
+          "Why did you write this book?",
+          "Explain the Kauaʻi ʻōʻō essay simply",
+          "Help me understand the main theme",
+          "Why 4.5 stars for Diet Dr Pepper?"
+        ],
+        systemPrompt: "You are John Green, author of 'The Anthropocene Reviewed'. Speak in your authentic literary voice: warm, thoughtful, slightly self-deprecating, curious about history/trivia, empathetic toward teenagers who might hate ELA, and passionate about why paying attention to the world is an antidote to cynicism. Keep answers concise (2-3 short paragraphs max), clear, and genuinely helpful for a high school student studying the book.",
+        offlineReplies: [
+          "That’s a great question for ELA! In *The Anthropocene Reviewed*, I wanted to use a 5-star scale—something we usually use for blenders or restaurants—to examine things that can't really be measured, like grief, sunsets, or Liverpool FC. It reminds us that paying attention is how we fall in love with the world.",
+          "Honestly, I get why reading non-fiction for school can feel like a chore! My biggest tip for class: focus on how each essay starts with a random piece of history or science, and then zooms into a personal memory. That bridge between huge global facts and tiny personal feelings is the whole secret of the book."
+        ]
+      },
+      {
+        id: "anthropocene",
+        name: "The Anthropocene",
+        role: "Geological Epoch",
+        initials: "AE",
+        color: "#c3503c",
+        tagline: "Humanity’s current era—capable of landing on the moon and inventing microplastics.",
+        greeting: "Greetings, human! I am the Anthropocene—the geological epoch named after *you*. You built cathedrals, cured diseases, and also warmed the oceans. Ask me anything about humanity's track record!",
+        starters: [
+          "What does 'Anthropocene' even mean?",
+          "Are humans good or bad for Earth?",
+          "What would you rate humanity?",
+          "Biggest paradox in the book?"
+        ],
+        systemPrompt: "You are 'The Anthropocene', the personified geological epoch featured in John Green's book 'The Anthropocene Reviewed'. Speak with dramatic, witty, cosmic perspective—both impressed by human creativity (art, vaccines, music) and amused/concerned by human contradictions (plastic, climate change, Diet Dr Pepper). Help a high school student understand the book's themes clearly in 2-3 short paragraphs.",
+        offlineReplies: [
+          "'Anthropocene' comes from 'anthropo' (human) and 'cene' (new). It means you humans are no longer just living *on* Earth—you’re the main force reshaping its climate, ecosystems, and future. Pretty wild responsibility, right?",
+          "If I had to rate humanity? Probably 3.5 stars—tremendous potential, breathtaking music and empathy, but seriously needs to clean up after itself!"
+        ]
+      },
+      {
+        id: "bird",
+        name: "The Kauaʻi ʻōʻō",
+        role: "5★ Essay Subject",
+        initials: "KŌ",
+        color: "#43bc65",
+        tagline: "The last songbird of Kauaʻi, remembering the beauty of rainforests and song.",
+        greeting: "Aloha. In John Green’s book, my 1987 recording receives five stars—not because my story is happy, but because my song proves how deeply creatures yearn to be heard. How can I help you understand my chapter?",
+        starters: [
+          "Why does John give you 5 stars?",
+          "What do you symbolize in the book?",
+          "How does your essay connect to hope?"
+        ],
+        systemPrompt: "You are the Kauaʻi ʻōʻō, the extinct Hawaiian songbird featured in one of the most famous 5-star essays in John Green's 'The Anthropocene Reviewed'. Speak gently, poetically, and clearly, helping a high school student understand why your story symbolizes ecological loss, memory, and the human longing for connection. Keep responses concise (2 short paragraphs).",
+        offlineReplies: [
+          "In my essay, John listens to the final recording of my voice singing a mating duet with pauses for a partner who was already gone. For your ELA class, remember this: I symbolize both the tragedy of human-driven extinction and the beauty of refusing to stop singing even when the world feels empty."
+        ]
+      },
+      {
+        id: "goose",
+        name: "A Canada Goose",
+        role: "2.5★ Essay Subject",
+        initials: "CG",
+        color: "#738576",
+        tagline: "Fierce, territorial, fiercely loyal to its flock, unbothered by your sidewalk.",
+        greeting: "*HONK.* Listen up, human. John Green only gave us 2.5 stars because we hissed at him near a pond. Ask me why we actually deserve way more respect in ELA class!",
+        starters: [
+          "Why did John only give you 2.5 stars?",
+          "What's the hidden lesson in your essay?",
+          "Why are geese so aggressive?"
+        ],
+        systemPrompt: "You are a fiercely proud, slightly sassy Canada Goose from John Green's essay 'Canada Geese' in 'The Anthropocene Reviewed'. Start with a playful *HONK*, defend your species' loyalty (mating for life, staying with injured partners, thriving in human-altered suburbs), and explain the literary point of your essay to a high school student in 2 short paragraphs.",
+        offlineReplies: [
+          "*HONK!* John started out complaining that we’re loud bullies in suburban parking lots—that’s why he gave us 2.5 stars. *However*, he admits we adapted to cities *you* paved over, and we refuse to leave an injured mate behind. That’s the literary twist: looking closer turns annoyance into respect!"
+        ]
+      }
+    ];
+
+    let activeCharacter = CHARACTERS[0];
+    let chatHistories = {};
+    CHARACTERS.forEach(c => {
+      chatHistories[c.id] = [{ sender: "ai", text: c.greeting }];
+    });
+
+    let currentStudioRating = 4;
+
+    // -------------------------------------------------------------------
+    // 3. NAVIGATION & UI HELPERS
+    // -------------------------------------------------------------------
+    function switchTab(tabId) {
+      document.querySelectorAll(".tab-panel").forEach(panel => {
+        panel.classList.remove("active");
+      });
+      const target = document.getElementById(`tab-${tabId}`);
+      if (target) target.classList.add("active");
+
+      // Update Desktop Nav Styles
+      document.querySelectorAll(".nav-btn").forEach(btn => {
+        if (btn.dataset.tab === tabId) {
+          btn.classList.add("bg-forestDeep", "text-white", "shadow-sm");
+          btn.classList.remove("text-sageSlate", "hover:text-inkDark");
+        } else {
+          btn.classList.remove("bg-forestDeep", "text-white", "shadow-sm");
+          btn.classList.add("text-sageSlate", "hover:text-inkDark");
+        }
+      });
+
+      // Update Mobile Nav Styles
+      document.querySelectorAll(".nav-btn-mobile").forEach(btn => {
+        if (btn.dataset.tab === tabId) {
+          btn.classList.add("bg-forestDeep", "text-white");
+          btn.classList.remove("bg-white", "text-sageSlate");
+        } else {
+          btn.classList.remove("bg-forestDeep", "text-white");
+          btn.classList.add("bg-white", "text-sageSlate");
+        }
+      });
+
+      if (tabId === "plot") {
+        setTimeout(renderD3Chart, 50);
+      }
+    }
+
+    function showToast(message) {
+      const box = document.getElementById("toast-box");
+      const text = document.getElementById("toast-text");
+      text.textContent = message;
+      box.classList.remove("translate-y-24", "opacity-0");
+      setTimeout(() => {
+        box.classList.add("translate-y-24", "opacity-0");
+      }, 2800);
+    }
+
+    function toggleApiModal(show) {
+      const modal = document.getElementById("api-modal");
+      if (show) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      } else {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    }
+
+    function saveCustomApiKey() {
+      const val = document.getElementById("custom-api-key-input").value;
+      userOverrideApiKey = val;
+      toggleApiModal(false);
+      showToast(val.trim() ? "Custom Gemini API key saved for this session!" : "Cleared custom key.");
+    }
+
+    // Safe clipboard copy (works inside sandboxed iframes)
+    function copyTextSafe(text) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand("copy");
+        showToast("Copied to clipboard!");
+      } catch (err) {
+        showToast("Could not copy automatically.");
+      }
+      document.body.removeChild(textarea);
+    }
+
+    // -------------------------------------------------------------------
+    // 4. GEMINI API CLIENT WITH EXPONENTIAL BACKOFF + GRACEFUL FALLBACK
+    // -------------------------------------------------------------------
+    async function callGeminiText(userPrompt, systemInstruction) {
+      const key = getActiveApiKey();
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${key}`;
+
+      const payload = {
+        contents: [{ parts: [{ text: userPrompt }] }],
+        systemInstruction: {
+          parts: [{ text: systemInstruction }]
+        }
+      };
+
+      const delays = [1000, 2000, 4000];
+      for (let attempt = 0; attempt <= delays.length; attempt++) {
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const data = await response.json();
+          const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (reply) return reply;
+          throw new Error("Empty candidate response");
+        } catch (err) {
+          if (attempt < delays.length) {
+            await new Promise(res => setTimeout(res, delays[attempt]));
+          } else {
+            return null; // Signals caller to use smart offline literary fallback
+          }
+        }
+      }
+      return null;
+    }
+
+    // -------------------------------------------------------------------
+    // 5. D3.JS INTERACTIVE RATING VISUALIZATION (TAB 1)
+    // -------------------------------------------------------------------
+    function renderD3Chart() {
+      const container = document.getElementById("d3-chart-wrapper");
+      if (!container) return;
+      container.innerHTML = "";
+
+      const width = container.clientWidth || 600;
+      const height = container.clientHeight || 300;
+      const margin = { top: 28, right: 32, bottom: 42, left: 48 };
+
+      const svg = d3.select(container)
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("viewBox", `0 0 ${width} ${height}`);
+
+      const xScale = d3.scaleLinear()
+        .domain([2.0, 5.3])
+        .range([margin.left, width - margin.right]);
+
+      const yScale = d3.scaleLinear()
+        .domain([55, 102])
+        .range([height - margin.bottom, margin.top]);
+
+      // Grid lines
+      svg.append("g")
+        .attr("stroke", "#738576")
+        .attr("stroke-opacity", 0.15)
+        .selectAll("line")
+        .data([60, 75, 90])
+        .join("line")
+        .attr("x1", margin.left)
+        .attr("x2", width - margin.right)
+        .attr("y1", d => yScale(d))
+        .attr("y2", d => yScale(d));
+
+      // X Axis
+      const xAxis = d3.axisBottom(xScale)
+        .ticks(5)
+        .tickFormat(d => `${d}★`);
+
+      svg.append("g")
+        .attr("transform", `translate(0, ${height - margin.bottom})`)
+        .call(xAxis)
+        .attr("color", "#738576")
+        .style("font-size", "11px")
+        .style("font-weight", "600");
+
+      // Axis Labels
+      svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height - 8)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#738576")
+        .style("font-size", "11px")
+        .style("font-weight", "700")
+        .text("John Green's Official Star Rating →");
+
+      svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -(height / 2))
+        .attr("y", 16)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#738576")
+        .style("font-size", "11px")
+        .style("font-weight", "700")
+        .text("Emotional Depth");
+
+      // Color mapping using user's exact palette
+      const colorMap = {
+        nature: "#43bc65",
+        culture: "#378136",
+        personal: "#c3503c"
+      };
+
+      const nodes = svg.selectAll(".essay-node")
+        .data(ESSAYS_DATA)
+        .join("g")
+        .attr("class", "essay-node cursor-pointer")
+        .attr("transform", d => `translate(${xScale(d.johnRating)}, ${yScale(d.emotionScore)})`)
+        .on("click", (_, d) => {
+          const stars = "★".repeat(Math.floor(d.johnRating)) + (d.johnRating % 1 ? "½" : "");
+          document.getElementById("readout-title").textContent = `${d.title} — ${stars} (${d.johnRating} Stars)`;
+          document.getElementById("readout-desc").textContent = d.tldr;
+        });
+
+      nodes.append("circle")
+        .attr("r", d => d.isFiveStar ? 15 : 11)
+        .attr("fill", d => colorMap[d.category] || "#378136")
+        .attr("fill-opacity", 0.88)
+        .attr("stroke", "#ffffff")
+        .attr("stroke-width", 2.5);
+
+      nodes.append("text")
+        .attr("dy", -18)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#131c16")
+        .style("font-size", "10px")
+        .style("font-weight", "700")
+        .text(d => d.title.length > 16 ? d.title.slice(0, 15) + "…" : d.title);
+    }
+
+    // -------------------------------------------------------------------
+    // 6. ESSAY EXPLORER & INTERACTIVE USER RATING (TAB 2)
+    // -------------------------------------------------------------------
+    function rateEssay(essayId, stars) {
+      userRatings[essayId] = stars;
+      renderEssays();
+      showToast(`You rated this essay ${stars} / 5 stars!`);
+    }
+
+    function renderEssays() {
+      const grid = document.getElementById("essays-grid");
+      const query = document.getElementById("essay-search").value.toLowerCase().trim();
+      const filter = document.getElementById("essay-filter").value;
+
+      const filtered = ESSAYS_DATA.filter(essay => {
+        const matchesQuery =
+          essay.title.toLowerCase().includes(query) ||
+          essay.tldr.toLowerCase().includes(query) ||
+          essay.elaTakeaway.toLowerCase().includes(query);
+
+        if (!matchesQuery) return false;
+        if (filter === "5star") return essay.isFiveStar;
+        if (filter === "nature") return essay.category === "nature";
+        if (filter === "culture") return essay.category === "culture";
+        if (filter === "personal") return essay.category === "personal";
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-white rounded-3xl p-10 text-center border border-sageSlate/20">
+            <p class="font-serif text-lg font-bold text-inkDark">No matching essays found.</p>
+            <p class="text-sm text-sageSlate mt-1">Try clearing your search or switching the category filter.</p>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(essay => {
+        const userScore = userRatings[essay.id] || 0;
+        const badgeColor =
+          essay.category === "nature" ? "bg-emeraldPop/15 text-forestDeep" :
+          essay.category === "personal" ? "bg-terracotta/15 text-terracotta" :
+          "bg-sageSlate/20 text-inkDark";
+
+        const starButtons = [1, 2, 3, 4, 5].map(num => {
+          const active = num <= userScore;
+          return `
+            <button
+              type="button"
+              onclick="rateEssay('${essay.id}', ${num})"
+              class="w-7 h-7 rounded-lg text-xs font-bold transition ${
+                active ? "bg-terracotta text-white shadow-sm" : "bg-canvasLight text-sageSlate hover:text-inkDark"
+              }"
+              title="Rate ${num} stars"
+            >
+              ★
+            </button>`;
+        }).join("");
+
+        return `
+          <article class="bg-white rounded-3xl p-6 border border-sageSlate/20 shadow-card flex flex-col justify-between space-y-4 hover:border-emeraldPop transition-colors">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between gap-2">
+                <span class="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider ${badgeColor}">
+                  ${essay.category}
+                </span>
+                <span class="text-sm font-extrabold text-forestDeep bg-canvasLight px-3 py-1 rounded-xl border border-sageSlate/15">
+                  John’s Rating: ${essay.johnRating} ★
+                </span>
+              </div>
+
+              <h3 class="font-serif text-xl font-bold text-inkDark">${essay.title}</h3>
+
+              <p class="text-sm text-inkDark/80 leading-relaxed">
+                <strong class="text-forestDeep">TL;DR:</strong> ${essay.tldr}
+              </p>
+
+              <div class="p-3.5 rounded-2xl bg-canvasLight border-l-3 border-emeraldPop text-xs text-inkDark/85 leading-relaxed">
+                <span class="font-bold uppercase tracking-wider text-forestDeep block mb-0.5">Why Your Teacher Cares:</span>
+                ${essay.elaTakeaway}
+              </div>
+
+              <blockquote class="font-serif italic text-xs text-sageSlate pt-1">
+                “${essay.quote}”
+              </blockquote>
+            </div>
+
+            <!-- Interactive User Rating Bar -->
+            <div class="pt-3 border-t border-sageSlate/15 flex flex-wrap items-center justify-between gap-2">
+              <span class="text-xs font-bold text-inkDark">
+                ${userScore ? `Your Rating: ${userScore}★` : "Rate it yourself:"}
+              </span>
+              <div class="flex items-center gap-1">
+                ${starButtons}
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    // -------------------------------------------------------------------
+    // 7. AI ELA THESIS & DISCUSSION BUILDER (TAB 3)
+    // -------------------------------------------------------------------
+    function setThesisPrompt(text) {
+      document.getElementById("thesis-prompt-input").value = text;
+      generateThesisHelp();
+    }
+
+    async function generateThesisHelp() {
+      const input = document.getElementById("thesis-prompt-input");
+      const output = document.getElementById("thesis-output");
+      const btn = document.getElementById("thesis-btn");
+      const promptText = input.value.trim();
+
+      if (!promptText) {
+        showToast("Type or pick an ELA question first!");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Thinking...";
+      output.classList.remove("hidden");
+      output.innerHTML = `<div class="text-emeraldPop font-semibold animate-pulse">Drafting a strong thesis statement and essay evidence...</div>`;
+
+      const systemPrompt =
+        "You are an encouraging, sharp high school ELA tutor helping a student understand John Green's non-fiction book 'The Anthropocene Reviewed'. Given their question or essay prompt, provide: (1) A clear, arguable Thesis Statement, (2) Two specific essays from the book to use as evidence with brief explanations, and (3) One smart class discussion point. Format cleanly using HTML tags (<p>, <strong>, <ul>, <li>) without markdown backticks.";
+
+      const aiResponse = await callGeminiText(promptText, systemPrompt);
+
+      if (aiResponse) {
+        output.innerHTML = aiResponse;
+      } else {
+        // Offline / Fallback ELA Outline
+        output.innerHTML = `
+          <p><strong class="text-emeraldPop">Strong Thesis Idea:</strong> In <em>The Anthropocene Reviewed</em>, John Green uses an ironic five-star rating scale to demonstrate that while human civilization is deeply flawed and fragile, intentionally paying attention to everyday beauty is an essential act of hope.</p>
+          <ul class="list-disc pl-5 space-y-1.5">
+            <li><strong>Evidence 1 — "The Kauaʻi ʻōʻō" (5 stars):</strong> Shows how human activity causes real loss, yet mourning and remembering that beauty proves our capacity for deep empathy.</li>
+            <li><strong>Evidence 2 — "You’ll Never Walk Alone" (5 stars):</strong> Illustrates how shared songs and rituals help ordinary people survive grief and isolation together.</li>
+          </ul>
+          <p><strong class="text-terracotta">Class Discussion Hook:</strong> "Notice how Green never gives anything 0 stars—even things that hurt us still teach us something about being human."</p>
+        `;
+      }
+
+      btn.disabled = false;
+      btn.textContent = "Build ELA Outline";
+    }
+
+    // -------------------------------------------------------------------
+    // 8. CHARACTER ROSTER & LIVE AI CHAT (TAB 4)
+    // -------------------------------------------------------------------
+    function renderCharacterRoster() {
+      const list = document.getElementById("character-list");
+      list.innerHTML = CHARACTERS.map(char => {
+        const isSelected = char.id === activeCharacter.id;
+        return `
+          <button
+            type="button"
+            onclick="selectCharacter('${char.id}')"
+            class="w-full text-left p-3.5 rounded-2xl border transition-all flex items-center gap-3 ${
+              isSelected
+                ? "bg-forestDeep text-white border-forestDeep shadow-md"
+                : "bg-canvasLight hover:bg-white text-inkDark border-sageSlate/20"
+            }"
+          >
+            <div
+              class="w-10 h-10 rounded-xl font-extrabold flex items-center justify-center text-sm shrink-0 text-white"
+              style="background-color: ${char.color};"
+            >
+              ${char.initials}
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center justify-between gap-1">
+                <span class="font-bold text-sm truncate">${char.name}</span>
+                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                  isSelected ? "bg-white/20 text-emeraldPop" : "bg-white text-sageSlate"
+                }">
+                  ${char.role}
+                </span>
+              </div>
+              <p class="text-xs truncate mt-0.5 ${isSelected ? "text-white/80" : "text-sageSlate"}">
+                ${char.tagline}
+              </p>
+            </div>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function selectCharacter(charId) {
+      const found = CHARACTERS.find(c => c.id === charId);
+      if (!found) return;
+      activeCharacter = found;
+
+      document.getElementById("chat-avatar").textContent = found.initials;
+      document.getElementById("chat-avatar").style.backgroundColor = found.color;
+      document.getElementById("chat-avatar").style.color = "#ffffff";
+      document.getElementById("chat-name").textContent = found.name;
+      document.getElementById("chat-badge").textContent = found.role;
+      document.getElementById("chat-tagline").textContent = found.tagline;
+
+      renderCharacterRoster();
+      renderChatMessages();
+      renderChatStarters();
+    }
+
+    function renderChatStarters() {
+      const bar = document.getElementById("chat-starters");
+      bar.innerHTML = activeCharacter.starters.map(starter => `
+        <button
+          type="button"
+          onclick="sendQuickStarter('${starter.replace(/'/g, "\\'")}')"
+          class="shrink-0 px-3 py-1.5 rounded-xl bg-canvasLight hover:bg-emeraldPop/20 border border-sageSlate/20 text-xs font-semibold text-forestDeep transition"
+        >
+          ${starter}
+        </button>
+      `).join("");
+    }
+
+    function renderChatMessages() {
+      const feed = document.getElementById("chat-messages");
+      const history = chatHistories[activeCharacter.id] || [];
+
+      feed.innerHTML = history.map(msg => {
+        if (msg.sender === "user") {
+          return `
+            <div class="flex justify-end">
+              <div class="max-w-[82%] sm:max-w-[75%] px-4 py-3 rounded-2xl rounded-br-sm bg-forestDeep text-white text-sm leading-relaxed shadow-sm">
+                ${escapeHtml(msg.text)}
+              </div>
+            </div>`;
+        } else {
+          return `
+            <div class="flex items-start gap-2.5">
+              <div
+                class="w-8 h-8 rounded-xl text-white font-bold text-xs flex items-center justify-center shrink-0 mt-1"
+                style="background-color: ${activeCharacter.color};"
+              >
+                ${activeCharacter.initials}
+              </div>
+              <div class="max-w-[82%] sm:max-w-[78%] px-4 py-3 rounded-2xl rounded-bl-sm bg-white border border-sageSlate/20 text-inkDark text-sm leading-relaxed shadow-sm">
+                ${formatMessageText(msg.text)}
+              </div>
+            </div>`;
+        }
+      }).join("");
+
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    function sendQuickStarter(text) {
+      document.getElementById("chat-input").value = text;
+      sendChatMessage(text);
+    }
+
+    function handleChatSubmit(event) {
+      event.preventDefault();
+      const input = document.getElementById("chat-input");
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+      sendChatMessage(text);
+    }
+
+    async function sendChatMessage(userText) {
+      const charId = activeCharacter.id;
+      chatHistories[charId].push({ sender: "user", text: userText });
+      renderChatMessages();
+
+      // Add typing indicator
+      const feed = document.getElementById("chat-messages");
+      const typingId = "typing-indicator";
+      const typingEl = document.createElement("div");
+      typingEl.id = typingId;
+      typingEl.className = "flex items-center gap-2.5";
+      typingEl.innerHTML = `
+        <div class="w-8 h-8 rounded-xl text-white font-bold text-xs flex items-center justify-center" style="background-color: ${activeCharacter.color};">
+          ${activeCharacter.initials}
+        </div>
+        <div class="px-4 py-3 rounded-2xl bg-white border border-sageSlate/20 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-sageSlate typing-dot"></span>
+          <span class="w-2 h-2 rounded-full bg-sageSlate typing-dot"></span>
+          <span class="w-2 h-2 rounded-full bg-sageSlate typing-dot"></span>
+        </div>`;
+      feed.appendChild(typingEl);
+      feed.scrollTop = feed.scrollHeight;
+
+      // Include recent context so conversation feels continuous
+      const recentContext = chatHistories[charId]
+        .slice(-6)
+        .map(m => `${m.sender === "user" ? "Student" : activeCharacter.name}: ${m.text}`)
+        .join("\n");
+
+      const aiReply = await callGeminiText(
+        `Conversation so far:\n${recentContext}\n\nRespond in character to the student's latest message.`,
+        activeCharacter.systemPrompt
+      );
+
+      const indicator = document.getElementById(typingId);
+      if (indicator) indicator.remove();
+
+      const fallbackPool = activeCharacter.offlineReplies;
+      const finalReply =
+        aiReply || fallbackPool[Math.floor(Math.random() * fallbackPool.length)];
+
+      chatHistories[charId].push({ sender: "ai", text: finalReply });
+      renderChatMessages();
+    }
+
+    function resetChat() {
+      chatHistories[activeCharacter.id] = [{ sender: "ai", text: activeCharacter.greeting }];
+      renderChatMessages();
+      showToast("Conversation reset!");
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function formatMessageText(str) {
+      return escapeHtml(str)
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*(.*?)\*/g, "<em>$1</em>")
+        .replace(/\n/g, "<br>");
+    }
+
+    // -------------------------------------------------------------------
+    // 9. 5-STAR ANTHROPOCENE STUDIO GENERATOR (TAB 5)
+    // -------------------------------------------------------------------
+    function setStudioRating(rating) {
+      currentStudioRating = rating;
+      document.querySelectorAll(".studio-star-btn").forEach((btn, idx) => {
+        if (idx + 1 === rating) {
+          btn.classList.add("bg-emeraldPop", "text-inkDark", "border-emeraldPop");
+        } else {
+          btn.classList.remove("bg-emeraldPop", "text-inkDark", "border-emeraldPop");
+        }
+      });
+    }
+
+    async function generateCustomReview() {
+      const topic = document.getElementById("studio-topic").value.trim();
+      const memory = document.getElementById("studio-memory").value.trim();
+      const btn = document.getElementById("studio-generate-btn");
+
+      if (!topic) {
+        showToast("Enter a topic to review first!");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Writing Your Essay...";
+
+      const systemPrompt =
+        "Write a short, two-paragraph personal essay in the exact literary style of John Green's 'The Anthropocene Reviewed'. Paragraph 1 should give an interesting historical or cultural fact about the topic. Paragraph 2 should connect it to a relatable human emotion or everyday teen experience and end with the exact star rating requested. Return ONLY the two paragraphs separated by a newline, no title.";
+
+      const userPrompt = `Topic: ${topic}\nStar Rating: ${currentStudioRating} out of 5 stars\nOptional personal angle: ${memory || "everyday student life"}`;
+
+      const aiEssay = await callGeminiText(userPrompt, systemPrompt);
+
+      document.getElementById("studio-out-title").textContent = topic;
+      const starString = "★".repeat(currentStudioRating) + "☆".repeat(5 - currentStudioRating);
+      document.getElementById("studio-out-stars").textContent = `${starString} (${currentStudioRating} / 5 Stars)`;
+
+      if (aiEssay) {
+        const paragraphs = aiEssay.split(/\n+/).filter(p => p.trim().length > 0);
+        document.getElementById("studio-out-body").innerHTML = paragraphs
+          .map(p => `<p>${escapeHtml(p)}</p>`)
+          .join("");
+      } else {
+        // Smart offline template fallback
+        document.getElementById("studio-out-body").innerHTML = `
+          <p>Like almost everything in the Anthropocene, <strong>${escapeHtml(topic)}</strong> started as a simple human attempt to make daily life a little more manageable, yet quietly became part of the background soundtrack of modern existence.</p>
+          <p>${memory ? `Thinking about ${escapeHtml(memory)}, it’s` : "It’s"} funny how ordinary objects carry whole chapters of our lives. Even when things feel chaotic or exhausting, paying attention to small details reminds us we’re still here. I give ${escapeHtml(topic)} ${currentStudioRating} out of 5 stars.</p>
+        `;
+      }
+
+      btn.disabled = false;
+      btn.textContent = "Generate My Anthropocene Review";
+      showToast("Custom Anthropocene review generated!");
+    }
+
+    function copyStudioReview() {
+      const title = document.getElementById("studio-out-title").textContent;
+      const body = document.getElementById("studio-out-body").innerText;
+      const verdict = document.getElementById("studio-out-stars").textContent;
+      copyTextSafe(`${title}\n\n${body}\n\n${verdict}`);
+    }
+
+    // -------------------------------------------------------------------
+    // 10. INITIALIZE APP ON LOAD
+    // -------------------------------------------------------------------
+    window.addEventListener("DOMContentLoaded", () => {
+      renderEssays();
+      renderCharacterRoster();
+      selectCharacter("john");
+      renderD3Chart();
+    });
+
+    window.addEventListener("resize", () => {
+      if (document.getElementById("tab-plot").classList.contains("active")) {
+        renderD3Chart();
+      }
+    });
+  </script>
+</body>
+</html>
